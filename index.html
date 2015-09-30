@@ -23,33 +23,20 @@ Author: Eric Bidelman (ericbidelman@chromium.org)
 <title>CMD THE MACHINES</title>
 <link rel="stylesheet" media="all" href="terminal.css">
 <link rel="chrome-application-definition" href="manifest.json">
+<link rel="shortcut icon" href="http://www.cmdthemachines.com/favicon.ico">
 </head>
 <body>
-
-<aside class="help hidden">
-  <section>
-    <div>
-      <span onclick="toggleHelp()" id="close">x</span>
-      <h2>Keyboard shortcuts</h2>
-      <div class="shortcuts">
-        <p><strong>&lt;ctrl&gt; + s</strong> : Toggle CRT monitor flicker effect</p>
-        <p><strong>&lt;esc&gt;</strong> : toggle this help menu</p>
-      </div>
-    </div>
-    <div>
-      <h2>What is this?</h2>
-      <p>A Command-line terminal/shell running on top of HTML5 APIs.</p>
-      <p>By: Eric Bidelman &lt;ericbidelman@chromium.org&gt;</p>
-    </div>
-  </section>
-</aside>
 
 <!--<div class="crt top"></div>-->
 <div class="interlace"></div>
 <div id="container"></div>
 <!--<div class="crt bottom"></div>-->
-
+    
+<script src="namegenerator.js"></script>
+<script src="colonizeclasses.js"></script>
 <script src="terminal.js"></script>
+
+    
 <script>
 function toggleHelp() {
   document.querySelector('.help').classList.toggle('hidden');
@@ -66,14 +53,6 @@ function toggleHelp() {
   } else if (localStorage.theme) {
     term.setTheme(localStorage.theme);
   }
-
-  document.body.addEventListener('keydown', function(e) {
-    if (e.keyCode == 27) { // Esc
-      toggleHelp();
-      e.stopPropagation();
-      e.preventDefault();
-    }
-  }, false);
 
   // Setup the DnD listeners for file drop.
   document.body.addEventListener('dragenter', function(e) {
@@ -111,6 +90,35 @@ function toggleHelp() {
     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
+</script>
+
+<script>
+    // Make a list of pod vessels
+    var i;
+    var j;
+    
+    var numVessels = getRandomInt(10, 20);
+    var numPodPerVessel = 10;
+    
+    var pods = [];
+    var vessels = [];
+    
+    var podIndex = 0;
+    var vesselIndex = 0;
+    
+    for(i=0; i<numVessels; i++){        
+        for(j=0; j<numPodPerVessel; j++){
+            pods[i] = new Pod(getRandomInt(100, 1000), podIndex);
+            podIndex++;
+        }
+        vessels[i] = new PodVessel(pods.slice(), null, vesselIndex);
+        vesselIndex++;
+        pods = [];
+    }
+    
+    //var pods = [new Pod(getRandomInt(100, 1000), 0)];
+    //var vessels = [new PodVessel(pods, generateName(), 1)]
+    //console.log(pods[0].getName());
 </script>
 </body>
 </html>

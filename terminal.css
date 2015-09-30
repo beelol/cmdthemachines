@@ -304,19 +304,3 @@ button[disabled] {
   -webkit-columns: 2;
   columns: 2;
 }
-
-
-/* Themes */
-.cream {
-  color: black;
-  background: #fffff3;
-}
-.cream .interlace {
-  opacity: 0.1;
-}
-.cream .prompt {
-  color: purple;
-}
-.cream .cmdline {
-  color: black;
-}

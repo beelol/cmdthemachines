@@ -90,11 +90,12 @@ var Terminal = Terminal || function(containerId) {
                              window.webkitRequestFileSystem;
 
   const VERSION_ = '0.5.1';
+    
   const CMDS_ = [
-    'cat', 'cd', 'cp', 'clear', 'date', 'help', 'install', 'ls', 'mkdir',
-    'mv', 'open', 'pwd', 'rm', 'rmdir', 'version', 'who', 'wget'
+    'help', 'about', 'units', 'launch'
   ];
-  const THEMES_ = ['default', 'cream'];
+    
+  const THEMES_ = ['default'];
 
   var fs_ = null;
   var cwd_ = null;
@@ -262,82 +263,25 @@ var Terminal = Terminal || function(containerId) {
       }
 
       switch (cmd) {
-        case 'cat':
-          var fileName = args.join(' ');
-
-          if (!fileName) {
-            output('usage: ' + cmd + ' filename');
-            break;
-          }
-
-          read_(cmd, fileName, function(result) {
-            output('<pre>' + result + '</pre>');
-          });
-
-          break;
-        case 'clear':
-          clear_(this);
-          return;
         case 'date':
           output((new Date()).toLocaleString());
           break;
-        case 'exit':
-          if (timer_ != null) {
-            magicWord_.stop();
-            clearInterval(timer_);
-          }
-          break;
         case 'help':
           output('<div class="ls-files">' + CMDS_.join('<br>') + '</div>');
-          output('<p>Add files by dragging them from your desktop.</p>');
-          break;
-        case 'ls':
-          ls_(function(entries) {
-            if (entries.length) {
-              var html = formatColumns_(entries);
-              util.toArray(entries).forEach(function(entry, i) {
-                html.push(
-                    '<span class="', entry.isDirectory ? 'folder' : 'file',
-                    '">', entry.name, '</span><br>');
-              });
-              html.push('</div>');
-              output(html.join(''));
-            }
-          });
-          break;
-        case 'pwd':
-          output(cwd_.fullPath);
-          break;
-        case 'cd':
-          var dest = args.join(' ') || '/';
-
-          cwd_.getDirectory(dest, {}, function(dirEntry) {
-            cwd_ = dirEntry;
-            output('<div>' + dirEntry.fullPath + '</div>');
-
-            // Tell FSN visualizer that we're cd'ing.
-            if (fsn_) {
-              fsn_.contentWindow.postMessage({cmd: 'cd', data: dest}, location.origin);
-            }
-
-          }, function(e) { invalidOpForEntryType_(e, cmd, dest); });
-
           break;
         case 'about':
           output("You are one of two Controller units designed for the Automated Galactic Expansion Movement (AGEM). You must Colonize.");
           break;
-        case 'cp':
-        case 'mv':
-          var src = args[0];
-          var dest = args[1];
-
-          if (!src || !dest) {
-            output(['usage: ', cmd, ' source target<br>',
-                   '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;', cmd,
-                   ' source directory/'].join(''));
-            break;
+        case 'units':
+          var vesselNames = [];
+          for(var i=0; i<vessels.length; i++){
+            vesselNames[i] = vessels[i].getName();
           }
-
+          output('<div class="ls-files">' + vesselNames.join('<br>') + '</div>');
+          break;
+        case 'system':
+          break;
+              
           var runAction = function(cmd, srcDirEntry, destDirEntry, opt_newName) {
             var newName = opt_newName || null;
             if (cmd == 'mv') {
@@ -386,11 +330,6 @@ var Terminal = Terminal || function(containerId) {
             var myWin = window.open(fileEntry.toURL(), 'mywin');
           });
 
-          break;
-        case 'init':
-          if (worker_) {
-            worker_.postMessage({cmd: 'init', type: type_, size: size_});
-          }
           break;
         case 'rm':
           // Remove recursively? If so, remove the flag(s) from the arg list.
