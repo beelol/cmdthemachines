@@ -89,7 +89,7 @@ var Terminal = Terminal || function(containerId) {
   window.requestFileSystem = window.requestFileSystem ||
                              window.webkitRequestFileSystem;
 
-  const VERSION_ = '1.0.0';
+  const VERSION_ = '0.5.1';
   const CMDS_ = [
     'cat', 'cd', 'cp', 'clear', 'date', 'help', 'install', 'ls', 'mkdir',
     'mv', 'open', 'pwd', 'rm', 'rmdir', 'version', 'who', 'wget'
@@ -106,7 +106,6 @@ var Terminal = Terminal || function(containerId) {
   var magicWord_ = null;
 
   var fsn_ = null;
-  var is3D_ = false;
 
   // Fire worker to return recursive snapshot of current FS tree.
   var worker_ = new Worker('worker.js');
@@ -127,7 +126,7 @@ var Terminal = Terminal || function(containerId) {
   container_.insertAdjacentHTML('beforeEnd',
       ['<output></output>',
        '<div id="input-line" class="input-line">',
-       '<div class="prompt">$&gt;</div><div><input class="cmdline" autofocus /></div>',
+       '<div class="prompt">&gt;</div><div><input class="cmdline" autofocus /></div>',
        '</div>'].join(''));
   var cmdLine_ = container_.querySelector('#input-line .cmdline');
   var output_ = container_.querySelector('output');
@@ -283,9 +282,6 @@ var Terminal = Terminal || function(containerId) {
           output((new Date()).toLocaleString());
           break;
         case 'exit':
-          if (is3D_) {
-            toggle3DView_();
-          }
           if (timer_ != null) {
             magicWord_.stop();
             clearInterval(timer_);
@@ -294,20 +290,6 @@ var Terminal = Terminal || function(containerId) {
         case 'help':
           output('<div class="ls-files">' + CMDS_.join('<br>') + '</div>');
           output('<p>Add files by dragging them from your desktop.</p>');
-          break;
-        case 'install':
-          // Check is installed.
-          if (window.chrome && window.chrome.app) {
-            if (!window.chrome.app.isInstalled) {
-              try {
-                chrome.app.install();
-              } catch(e) {
-                alert(e + '\nEnable is about:flags');
-              }
-            } else {
-              output('This app is already installed.');
-            }
-          }
           break;
         case 'ls':
           ls_(function(entries) {
@@ -341,39 +323,8 @@ var Terminal = Terminal || function(containerId) {
           }, function(e) { invalidOpForEntryType_(e, cmd, dest); });
 
           break;
-        case 'mkdir':
-          var dashP = false;
-          var index = args.indexOf('-p');
-          if (index != -1) {
-            args.splice(index, 1);
-            dashP = true;
-          }
-
-          if (!args.length) {
-            output('usage: ' + cmd + ' [-p] directory<br>');
-            break;
-          }
-
-          // Create each directory passed as an argument.
-          args.forEach(function(dirName, i) {
-            if (dashP) {
-              var folders = dirName.split('/');
-
-              // Throw out './' or '/' if present on the beginning of our path.
-              if (folders[0] == '.' || folders[0] == '') {
-                folders = folders.slice(1);
-              }
-
-              createDir_(cwd_, folders);
-            } else {
-              cwd_.getDirectory(dirName, {create: true, exclusive: true}, function() {
-                // Tell FSN visualizer that we're mkdir'ing.
-                if (fsn_) {
-                  fsn_.contentWindow.postMessage({cmd: 'mkdir', data: dirName}, location.origin);
-                }
-              }, function(e) { invalidOpForEntryType_(e, cmd, dirName); });
-            }
-          });
+        case 'about':
+          output("You are one of two Controller units designed for the Automated Galactic Expansion Movement (AGEM). You must Colonize.");
           break;
         case 'cp':
         case 'mv':
@@ -706,37 +657,6 @@ var Terminal = Terminal || function(containerId) {
     }
   }
 
-  function toggle3DView_() {
-    var body = document.body;
-    body.classList.toggle('offscreen');
-
-    is3D_ = !is3D_;
-
-    if (body.classList.contains('offscreen')) {
-
-      container_.style.webkitTransform =
-          'translateY(' + (util.getDocHeight() - 175) + 'px)';
-
-      var transEnd_ = function(e) {
-        var iframe = document.createElement('iframe');
-        iframe.id = 'fsn';
-        iframe.src = '../fsn/fsn_proto.html';
-
-        fsn_ = body.insertBefore(iframe, body.firstElementChild);
-
-        iframe.contentWindow.onload = function() {
-          worker_.postMessage({cmd: 'read', type: type_, size: size_});
-        }
-        container_.removeEventListener('webkitTransitionEnd', transEnd_, false);
-      };
-      container_.addEventListener('webkitTransitionEnd', transEnd_, false);
-    } else {
-      container_.style.webkitTransform = 'translateY(0)';
-      body.removeChild(fsn_);
-      fsn_ = null;
-    }
-  }
-
   function output(html) {
     output_.insertAdjacentHTML('beforeEnd', html);
     //output_.scrollIntoView();
@@ -745,10 +665,11 @@ var Terminal = Terminal || function(containerId) {
 
   return {
     initFS: function(persistent, size) {
-      output('<div>Welcome to ' + document.title +
-             '! (v' + VERSION_ + ')</div>');
-      output((new Date()).toLocaleString());
-      output('<p>Documentation: type "help"</p>');
+      output('<div>Booting... ControlOS (v' + VERSION_ + ') successfully booted. </div>');
+      output('<div>Connecting...<div>');
+      output('<div>Successfully connected to MACHNET <div>');
+//      output((new Date()).toLocaleString());
+      output('<p>Awaiting your command:</p>');
 
       if (!!!window.requestFileSystem) {
         output('<div>Sorry! The FileSystem APIs are not available in your browser.</div>');
@@ -797,7 +718,6 @@ var Terminal = Terminal || function(containerId) {
         }, errorHandler_);
       });
     },
-    toggle3DView: toggle3DView_,
     selectFile: selectFile_
   }
 };
