@@ -1,7 +1,5 @@
-/// <summary>
-/// Provides tools to generate a name for celestial bodies.
-/// </summary>
-//class CelestialNamer {
+
+// This script provides tools to generate a name for celestial bodies.
 
 var letters = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
 
@@ -47,17 +45,13 @@ function generateName() {
         word += letter;
     }
 
-    for (i = 0; i < word.length; i++) {
+    // Capitalize first letter
+    newWord += word[0].toString().toUpperCase();
+    
+    // Add the rest
+    for (i = 1; i < word.length; i++) {
         newWord += word[i];
     }
-
-    newWord[0] = newWord[0].toString().toUpperCase();
     
     return newWord;
-}
-         
-
-
-
-
-//}
+}        
