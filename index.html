@@ -32,6 +32,7 @@ Author: Eric Bidelman (ericbidelman@chromium.org)
 <div id="container"></div>
 <!--<div class="crt bottom"></div>-->
     
+<script src="parsefunctions.js"></script>  
 <script src="namegenerator.js"></script>
 <script src="colonizeclasses.js"></script>
 <script src="terminal.js"></script>
@@ -103,8 +104,8 @@ function toggleHelp() {
     var pods = [];
     var vessels = [];
     
-    var podIndex = 0;
-    var vesselIndex = 0;
+    var podIndex = 1;
+    var vesselIndex = 1;
     
     for(i=0; i<numVessels; i++){        
         for(j=0; j<numPodPerVessel; j++){
@@ -115,10 +116,6 @@ function toggleHelp() {
         vesselIndex++;
         pods = [];
     }
-    
-    //var pods = [new Pod(getRandomInt(100, 1000), 0)];
-    //var vessels = [new PodVessel(pods, generateName(), 1)]
-    //console.log(pods[0].getName());
 </script>
 </body>
 </html>

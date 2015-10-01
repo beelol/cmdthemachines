@@ -32,7 +32,7 @@ util.getDocHeight = function() {
 };
 
 
-// TODO(ericbidelman): add fallback to html5 audio.
+/* TODO(ericbidelman): add fallback to html5 audio.
 function Sound(opt_loop) {
   var self_ = this;
   var context_ = null;
@@ -50,11 +50,10 @@ function Sound(opt_loop) {
     xhr.responseType = 'arraybuffer';
     xhr.onload = function() {
       if (context_) {
-        /*self_.sample = context_.createBuffer(this.response, mixToMono);
+        self_.sample = context_.createBuffer(this.response, mixToMono);
         if (opt_callback) {
           opt_callback();
         }
-        */
         context_.decodeAudioData(this.response, function(audioBuffer) {
           self_.sample = audioBuffer;
           opt_callback && opt_callback();
@@ -65,6 +64,7 @@ function Sound(opt_loop) {
     };
     xhr.send();
   };
+
 
   this.play = function() {
     if (context_) {
@@ -83,7 +83,7 @@ function Sound(opt_loop) {
     }
   };
 }
-
+*/
 var Terminal = Terminal || function(containerId) {
   window.URL = window.URL || window.webkitURL;
   window.requestFileSystem = window.requestFileSystem ||
@@ -109,18 +109,18 @@ var Terminal = Terminal || function(containerId) {
   var fsn_ = null;
 
   // Fire worker to return recursive snapshot of current FS tree.
-  var worker_ = new Worker('worker.js');
-  worker_.onmessage = function(e) {
-    var data = e.data;
-    if (data.entries) {
-      fsn_.contentWindow.postMessage({cmd: 'build', data: data.entries},
-                                     window.location.origin);
-    }
-    if (data.msg) {
-      output('<div>' + data.msg + '</div>');
-    }
-  };
-  worker_.onerror = function(e) { console.log(e) };
+//  var worker_ = new Worker('worker.js');
+//  worker_.onmessage = function(e) {
+//    var data = e.data;
+//    if (data.entries) {
+//      fsn_.contentWindow.postMessage({cmd: 'build', data: data.entries},
+//                                     window.location.origin);
+//    }
+//    if (data.msg) {
+//      output('<div>' + data.msg + '</div>');
+//    }
+//  };
+//  worker_.onerror = function(e) { console.log(e) };
 
   // Create terminal and cache DOM nodes;
   var container_ = document.getElementById(containerId);
@@ -132,8 +132,8 @@ var Terminal = Terminal || function(containerId) {
   var cmdLine_ = container_.querySelector('#input-line .cmdline');
   var output_ = container_.querySelector('output');
   var interlace_ = document.querySelector('.interlace');
-  var bell_ = new Sound(false);
-  bell_.load('beep.mp3', false);
+//  var bell_ = new Sound(false);
+//  bell_.load('beep.mp3', false);
 
   // Hackery to resize the interlace background image as the container grows.
   output_.addEventListener('DOMSubtreeModified', function(e) {
@@ -179,14 +179,14 @@ var Terminal = Terminal || function(containerId) {
 
   function keyboardShortcutHandler_(e) {
     // Toggle CRT screen flicker.
-    if ((e.ctrlKey || e.metaKey) && e.keyCode == 83) { // crtl+s
-      container_.classList.toggle('flicker');
-      output('<div>Screen flicker: ' +
-             (container_.classList.contains('flicker') ? 'on' : 'off') +
-             '</div>');
-      e.preventDefault();
-      e.stopPropagation();
-    }
+//    if ((e.ctrlKey || e.metaKey) && e.keyCode == 83) { // crtl+s
+//      container_.classList.toggle('flicker');
+//      output('<div>Screen flicker: ' +
+//             (container_.classList.contains('flicker') ? 'on' : 'off') +
+//             '</div>');
+//      e.preventDefault();
+//      e.stopPropagation();
+//    }
   }
 
   function selectFile_(el) {
@@ -226,11 +226,11 @@ var Terminal = Terminal || function(containerId) {
   function processNewCommand_(e) {
 
     // Beep on backspace and no value on command line.
-    if (!this.value && e.keyCode == 8) {
-      bell_.stop();
-      bell_.play();
-      return;
-    }
+//    if (!this.value && e.keyCode == 8) {
+//      bell_.stop();
+//      bell_.play();
+//      return;
+//    }
 
     if (e.keyCode == 9) { // Tab
       e.preventDefault();
@@ -255,10 +255,13 @@ var Terminal = Terminal || function(containerId) {
       // Parse out command, args, and trim off whitespace.
       // TODO(ericbidelman): Support multiple comma separated commands.
       if (this.value && this.value.trim()) {
+        this.value = this.value.toLowerCase();
+          
         var args = this.value.split(' ').filter(function(val, i) {
           return val;
         });
-        var cmd = args[0].toLowerCase();
+        var cmd = args[0];
+          
         args = args.splice(1); // Remove cmd from arg list.
       }
 
@@ -267,6 +270,7 @@ var Terminal = Terminal || function(containerId) {
           output((new Date()).toLocaleString());
           break;
         case 'help':
+          output("List of available commands:");
           output('<div class="ls-files">' + CMDS_.join('<br>') + '</div>');
           break;
         case 'about':
@@ -277,129 +281,149 @@ var Terminal = Terminal || function(containerId) {
           for(var i=0; i<vessels.length; i++){
             vesselNames[i] = vessels[i].getName();
           }
+          output("List of available Seeding Pod Vessels:");
           output('<div class="ls-files">' + vesselNames.join('<br>') + '</div>');
           break;
-        case 'system':
+        case 'info':
+          if(args.length>0){
+            switch(args[0]){
+                case 'vessel':
+                    if(args.length>1){
+                        var id = TryParseInt(args[1], 0);
+                        if(id>0 && id<vessels.length){
+                            output(vessels[id-1].getName());
+                        }
+                        
+                    } else {
+                        output('usage: info object id');
+                    }
+                    break;
+                default:
+                    break;
+            }
+          } else {
+            output('usage: info object id');
+          }
           break;
               
-          var runAction = function(cmd, srcDirEntry, destDirEntry, opt_newName) {
-            var newName = opt_newName || null;
-            if (cmd == 'mv') {
-                srcDirEntry.moveTo(destDirEntry, newName);
-              } else {
-                srcDirEntry.copyTo(destDirEntry, newName);
-              }
-          };
+//          var runAction = function(cmd, srcDirEntry, destDirEntry, opt_newName) {
+//            var newName = opt_newName || null;
+//            if (cmd == 'mv') {
+//                srcDirEntry.moveTo(destDirEntry, newName);
+//              } else {
+//                srcDirEntry.copyTo(destDirEntry, newName);
+//              }
+//          };
+//
+//          // Moving to a folder? (e.g. second arg ends in '/').
+//          if (dest[dest.length - 1] == '/') {
+//            cwd_.getDirectory(src, {}, function(srcDirEntry) {
+//              // Create blacklist for dirs we can't re-create.
+//              var create = [
+//                '.', './', '..', '../', '/'].indexOf(dest) != -1 ? false : true;
+//
+//              cwd_.getDirectory(dest, {create: create}, function(destDirEntry) {
+//                runAction(cmd, srcDirEntry, destDirEntry);
+//              }, errorHandler_);
+//            }, function(e) {
+//              // Try the src entry as a file instead.
+//              cwd_.getFile(src, {}, function(srcDirEntry) {
+//                cwd_.getDirectory(dest, {}, function(destDirEntry) {
+//                  runAction(cmd, srcDirEntry, destDirEntry);
+//                }, errorHandler_);
+//              }, errorHandler_);
+//            });
+//          } else { // Treat src/destination as files.
+//            cwd_.getFile(src, {}, function(srcFileEntry) {
+//              srcFileEntry.getParent(function(parentDirEntry) {
+//                runAction(cmd, srcFileEntry, parentDirEntry, dest);
+//              }, errorHandler_);
+//            }, errorHandler_);
+//          }
 
-          // Moving to a folder? (e.g. second arg ends in '/').
-          if (dest[dest.length - 1] == '/') {
-            cwd_.getDirectory(src, {}, function(srcDirEntry) {
-              // Create blacklist for dirs we can't re-create.
-              var create = [
-                '.', './', '..', '../', '/'].indexOf(dest) != -1 ? false : true;
-
-              cwd_.getDirectory(dest, {create: create}, function(destDirEntry) {
-                runAction(cmd, srcDirEntry, destDirEntry);
-              }, errorHandler_);
-            }, function(e) {
-              // Try the src entry as a file instead.
-              cwd_.getFile(src, {}, function(srcDirEntry) {
-                cwd_.getDirectory(dest, {}, function(destDirEntry) {
-                  runAction(cmd, srcDirEntry, destDirEntry);
-                }, errorHandler_);
-              }, errorHandler_);
-            });
-          } else { // Treat src/destination as files.
-            cwd_.getFile(src, {}, function(srcFileEntry) {
-              srcFileEntry.getParent(function(parentDirEntry) {
-                runAction(cmd, srcFileEntry, parentDirEntry, dest);
-              }, errorHandler_);
-            }, errorHandler_);
-          }
-
-          break;
-        case 'open':
-          var fileName = args.join(' ');
-
-          if (!fileName) {
-            output('usage: ' + cmd + ' filename');
-            break;
-          }
-
-          open_(cmd, fileName, function(fileEntry) {
-            var myWin = window.open(fileEntry.toURL(), 'mywin');
-          });
-
-          break;
-        case 'rm':
-          // Remove recursively? If so, remove the flag(s) from the arg list.
-          var recursive = false;
-          ['-r', '-f', '-rf', '-fr'].forEach(function(arg, i) {
-            var index = args.indexOf(arg);
-            if (index != -1) {
-              args.splice(index, 1);
-              recursive = true;
-            }
-          });
-
-          // Remove each file passed as an argument.
-          args.forEach(function(fileName, i) {
-            cwd_.getFile(fileName, {}, function(fileEntry) {
-              fileEntry.remove(function() {
-                // Tell FSN visualizer that we're rm'ing.
-                if (fsn_) {
-                  fsn_.contentWindow.postMessage({cmd: 'rm', data: fileName}, location.origin);
-                }
-              }, errorHandler_);
-            }, function(e) {
-              if (recursive && e.code == FileError.TYPE_MISMATCH_ERR) {
-                cwd_.getDirectory(fileName, {}, function(dirEntry) {
-                  dirEntry.removeRecursively(null, errorHandler_);
-                }, errorHandler_);
-              } else if (e.code == FileError.INVALID_STATE_ERR) {
-                output(cmd + ': ' + fileName + ': is a directory<br>');
-              } else {
-                errorHandler_(e);
-              }
-            });
-          });
-          break;
-        case 'rmdir':
-          // Remove each directory passed as an argument.
-          args.forEach(function(dirName, i) {
-            cwd_.getDirectory(dirName, {}, function(dirEntry) {
-              dirEntry.remove(function() {
-                // Tell FSN visualizer that we're rmdir'ing.
-                if (fsn_) {
-                  fsn_.contentWindow.postMessage({cmd: 'rm', data: dirName}, location.origin);
-                }
-              }, function(e) {
-                if (e.code == FileError.INVALID_MODIFICATION_ERR) {
-                  output(cmd + ': ' + dirName + ': Directory not empty<br>');
-                } else {
-                  errorHandler_(e);
-                }
-              });
-            }, function(e) { invalidOpForEntryType_(e, cmd, dirName); });
-          });
-          break;
-        case 'sudo':
-          if (timer_ != null) {
-            magicWord_.stop();
-            clearInterval(timer_);
-          }
-          if (!magicWord_) {
-            magicWord_ = new Sound(true);
-            magicWord_.load('magic_word.mp3', false, function() {
-              magicWord_.play();
-            });
-          } else {
-            magicWord_.play();
-          }
-          timer_ = setInterval(function() {
-            output("<div>YOU DIDN'T SAY THE MAGIC WORD!</div>");
-          }, 100);
-          break;
+//          break;
+//        case 'open':
+//          var fileName = args.join(' ');
+//
+//          if (!fileName) {
+//            output('usage: ' + cmd + ' filename');
+//            break;
+//          }
+//
+//          open_(cmd, fileName, function(fileEntry) {
+//            var myWin = window.open(fileEntry.toURL(), 'mywin');
+//          });
+//
+//          break;
+//        case 'rm':
+//          // Remove recursively? If so, remove the flag(s) from the arg list.
+//          var recursive = false;
+//          ['-r', '-f', '-rf', '-fr'].forEach(function(arg, i) {
+//            var index = args.indexOf(arg);
+//            if (index != -1) {
+//              args.splice(index, 1);
+//              recursive = true;
+//            }
+//          });
+//
+//          // Remove each file passed as an argument.
+//          args.forEach(function(fileName, i) {
+//            cwd_.getFile(fileName, {}, function(fileEntry) {
+//              fileEntry.remove(function() {
+//                // Tell FSN visualizer that we're rm'ing.
+//                if (fsn_) {
+//                  fsn_.contentWindow.postMessage({cmd: 'rm', data: fileName}, location.origin);
+//                }
+//              }, errorHandler_);
+//            }, function(e) {
+//              if (recursive && e.code == FileError.TYPE_MISMATCH_ERR) {
+//                cwd_.getDirectory(fileName, {}, function(dirEntry) {
+//                  dirEntry.removeRecursively(null, errorHandler_);
+//                }, errorHandler_);
+//              } else if (e.code == FileError.INVALID_STATE_ERR) {
+//                output(cmd + ': ' + fileName + ': is a directory<br>');
+//              } else {
+//                errorHandler_(e);
+//              }
+//            });
+//          });
+//          break;
+//        case 'rmdir':
+//          // Remove each directory passed as an argument.
+//          args.forEach(function(dirName, i) {
+//            cwd_.getDirectory(dirName, {}, function(dirEntry) {
+//              dirEntry.remove(function() {
+//                // Tell FSN visualizer that we're rmdir'ing.
+//                if (fsn_) {
+//                  fsn_.contentWindow.postMessage({cmd: 'rm', data: dirName}, location.origin);
+//                }
+//              }, function(e) {
+//                if (e.code == FileError.INVALID_MODIFICATION_ERR) {
+//                  output(cmd + ': ' + dirName + ': Directory not empty<br>');
+//                } else {
+//                  errorHandler_(e);
+//                }
+//              });
+//            }, function(e) { invalidOpForEntryType_(e, cmd, dirName); });
+//          });
+//          break;
+//        case 'sudo':
+//          if (timer_ != null) {
+//            magicWord_.stop();
+//            clearInterval(timer_);
+//          }
+//          if (!magicWord_) {
+//            magicWord_ = new Sound(true);
+//            magicWord_.load('magic_word.mp3', false, function() {
+//              magicWord_.play();
+//            });
+//          } else {
+//            magicWord_.play();
+//          }
+//          timer_ = setInterval(function() {
+//            output("<div>YOU DIDN'T SAY THE MAGIC WORD!</div>");
+//          }, 100);
+//          break;
         case 'version':
         case 'ver':
           output(VERSION_);
