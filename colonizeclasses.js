@@ -45,3 +45,7 @@ PodVessel.prototype.moveToSystem = function(system) {
 PodVessel.prototype.getName = function() {
     return "Vessel " + this.id.toString();
 }
+
+PodVessel.prototype.getStatus = function() {
+    return this.getName() + " standing by.";
+}

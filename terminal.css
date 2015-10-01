@@ -202,6 +202,13 @@ iframe#fsn {
   -webkit-column-width: 100px;
   column-width: 100px;
 }
+.one-liner {
+  /*height: 45px;*/
+  /* Default, but changed by js depending on length of filename */
+  overflow-x: auto;
+  -webkit-column-width: 1000px;
+  column-width: 1000px;
+}
 .ls-files span {
   cursor: pointer;
 }

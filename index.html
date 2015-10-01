@@ -109,10 +109,11 @@ function toggleHelp() {
     
     for(i=0; i<numVessels; i++){        
         for(j=0; j<numPodPerVessel; j++){
-            pods[i] = new Pod(getRandomInt(100, 1000), podIndex);
+            pods[j] = new Pod(getRandomInt(100, 1000), podIndex);
             podIndex++;
         }
-        vessels[i] = new PodVessel(pods.slice(), null, vesselIndex);
+        vessels[i] = new PodVessel(pods.slice(0, pods.length), null, vesselIndex);
+        
         vesselIndex++;
         pods = [];
     }

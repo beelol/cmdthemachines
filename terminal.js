@@ -16,6 +16,8 @@ limitations under the License.
 Author: Eric Bidelman (ericbidelman@chromium.org)
 */
 
+const newline = '<div class="one-liner">';
+
 var util = util || {};
 util.toArray = function(list) {
   return Array.prototype.slice.call(list || [], 0);
@@ -92,7 +94,7 @@ var Terminal = Terminal || function(containerId) {
   const VERSION_ = '0.5.1';
     
   const CMDS_ = [
-    'help', 'about', 'units', 'launch'
+    'help', 'about', 'units', 'info'
   ];
     
   const THEMES_ = ['default'];
@@ -290,10 +292,24 @@ var Terminal = Terminal || function(containerId) {
                 case 'vessel':
                     if(args.length>1){
                         var id = TryParseInt(args[1], 0);
-                        if(id>0 && id<vessels.length){
-                            output(vessels[id-1].getName());
+                        if(id>0 && id<=vessels.length){
+                            var vessel = vessels[id-1];
+                            output(vessel.getStatus());
+                            output(newline + 'Hull Integrity: ' + '[==========] 100%');
+                            output(newline + 'Location: ' + vessel.system);
+                            output(newline + 'List of Seeding Pods docked on ' + vessel.getName() + ':');
+                            output(newline);
+                            
+                            var podNames = [];
+                            
+                            for(i=0; i<vessel.pods.length; i++){
+                                podNames[i] = vessel.pods[i].getName();
+                            }
+                            
+                            output('<div class="ls-files">' + podNames.join('<br>') + '</div>');
+                        } else {
+                            output(newline + 'Vessel with id \'' + id + '\'' + ' is not available.');
                         }
-                        
                     } else {
                         output('usage: info object id');
                     }
