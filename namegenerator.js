@@ -38,8 +38,7 @@ function generateName() {
         letter = letters[letterIndex], wordLength = getRandomInt(4, 8-1),
         word = [letter], newWord = "";
     
-    for (i = 1; i < wordLength; i++) {
-        console.log(word[i - 1]);
+    for (i = 1; i < wordLength; i++) {        
         letter = nextLetter(word[i - 1]);
         
         word += letter;

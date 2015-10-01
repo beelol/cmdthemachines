@@ -287,13 +287,55 @@ var Terminal = Terminal || function(containerId) {
           output('<div class="ls-files">' + vesselNames.join('<br>') + '</div>');
           break;
         case 'info':
-          if(args.length>0){
-            switch(args[0]){
+          if(args.length>0) {
+            switch(args[0]) {
                 case 'vessel':
-                    if(args.length>1){
+                    if(args.length>1) {
                         var id = TryParseInt(args[1], 0);
                         if(id>0 && id<=vessels.length){
                             var vessel = vessels[id-1];
+                            output(vessel.getStatus());
+                            output(newline + 'Hull Integrity: ' + '[==========] 100%');
+                            output(newline + 'Location: ' + vessel.system);
+                            output(newline + 'List of Seeding Pods docked on ' + vessel.getName() + ':');
+                            output(newline);
+                            
+                            var podNames = [];
+                            
+                            for(i=0; i<vessel.pods.length; i++){
+                                podNames[i] = '[' + vessel.pods[i].getName() + ']';
+                            }
+                            
+                            output('<div class="ls-files">' + podNames.join('<br>') + '</div>');
+                        } else { // If the ID is out of bounds of array
+                            output(newline + 'Vessel with id \'' + id + '\'' + ' is not available.');
+                        }
+                    } else {
+                        output('usage: info object id');
+                    }
+                    break;
+                case 'pod':
+                    if(args.length>1) {
+                        var id = TryParseInt(args[1], 0);
+                        if(id>0 && id<=podList.length){
+                            var pod = podList[id-1];
+                            output(newline + 'Status of Pod ' + id + ':');
+                            output(newline + 'Hull Integrity: ' + '[==========] 100%');
+                            output(newline + 'Location: ' + pod.getLocation());
+                            output(newline + 'Forces: ' + pod.forces);
+                            output(newline);
+                        } else { // If the ID is out of bounds of array
+                            output(newline + 'Pod with id \'' + id + '\'' + ' is not available.');
+                        }
+                    } else {
+                        output('usage: info object id');
+                    }
+                    break;
+                case 'system':
+                    if(args.length>1) {
+                        var name = args[1];
+                        if(id>0 && id<=solarSystems.length){
+                            var system = solarSystems[name];
                             output(vessel.getStatus());
                             output(newline + 'Hull Integrity: ' + '[==========] 100%');
                             output(newline + 'Location: ' + vessel.system);
@@ -307,7 +349,7 @@ var Terminal = Terminal || function(containerId) {
                             }
                             
                             output('<div class="ls-files">' + podNames.join('<br>') + '</div>');
-                        } else {
+                        } else { // If the ID is out of bounds of array
                             output(newline + 'Vessel with id \'' + id + '\'' + ' is not available.');
                         }
                     } else {

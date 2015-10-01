@@ -79,7 +79,7 @@ function toggleHelp() {
     term.addDroppedFiles(e.dataTransfer.files);
     term.output('<div>File(s) added!</div>');
   }, false);
-})();
+})(); 
 </script>
 <script>
   var _gaq = _gaq || [];
@@ -94,29 +94,48 @@ function toggleHelp() {
 </script>
 
 <script>
-    // Make a list of pod vessels
-    var i;
-    var j;
     
+    var numSolarSystems = getRandomInt(30, 40);
+    
+    var solarSystems = [];
+    
+    var planets = [];        
+    
+    for(i=0; i<numSolarSystems; i++) {   
+        var numPlanets = getRandomInt(6, 16);
+        
+        var currentSystemPlanets = [];    
+        
+        for(j=0; j<numPlanets; j++) {            
+            currentSystemPlanets[j] = new Planet(generateName(), getRandomInt(100, 1500));
+            
+            planets.push(currentSystemPlanets[j]);                    
+        }
+        
+        solarSystems[i] = new SolarSystem(generateName(), currentSystemPlanets);            
+    }    
+    
+//    for(i=0; i<solarSystems.length; i++) {
+//        console.log(solarSystems[i].getName());
+//    }
+//    
+    // Make a list of pod vessels
     var numVessels = getRandomInt(10, 20);
     var numPodPerVessel = 10;
     
-    var pods = [];
+    var podList = [];
     var vessels = [];
-    
-    var podIndex = 1;
-    var vesselIndex = 1;
-    
-    for(i=0; i<numVessels; i++){        
+
+    for(i=0; i<numVessels; i++){  
+        var pods = [];
         for(j=0; j<numPodPerVessel; j++){
-            pods[j] = new Pod(getRandomInt(100, 1000), podIndex);
-            podIndex++;
+            var podIndex = j + i * numPodPerVessel;
+            pods[j] = new Pod(getRandomInt(100, 1000), podIndex + 1, i);
+            podList[podIndex] = pods[j];
         }
-        vessels[i] = new PodVessel(pods.slice(0, pods.length), null, vesselIndex);
-        
-        vesselIndex++;
-        pods = [];
+        vessels[i] = new PodVessel(pods.slice(0, pods.length), null, i + 1);
     }
 </script>
+    
 </body>
 </html>

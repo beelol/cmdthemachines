@@ -21,15 +21,26 @@ SolarSystem.prototype.getName = function() {
 
 
 // Used to colonize a planet
-function Pod (forces, id){
+function Pod (forces, id, vesselID){
     this.forces = forces;
     this.id = id;
+    this.vesselID = vesselID;
+    this.docked = true;
+    this.planet = 'none';
 }
 
 Pod.prototype.getName = function() {
     return "Pod " + this.id;
 }
 
+Pod.prototype.getLocation = function() {
+    if(this.docked = true){
+        return 'Docked on ' + vessels[this.vesselID].getName() + '.';
+    }
+    else{
+        return 'Deployed on ' + this.planet + '.';
+    }
+}
 
 // Transports pods between systems
 function PodVessel(pods, system, id) {
