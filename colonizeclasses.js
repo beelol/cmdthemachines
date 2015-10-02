@@ -27,6 +27,8 @@ function Pod (forces, id, vesselID){
     this.vesselID = vesselID;
     this.docked = true;
     this.planet = 'none';
+    this.maxHealth = 100;
+    this.health = this.maxHealth;
 }
 
 Pod.prototype.getName = function() {
@@ -42,11 +44,35 @@ Pod.prototype.getLocation = function() {
     }
 }
 
+Pod.prototype.getIntegrity = function() {
+    var approx = roundToNearestTen(this.health)/10; /* To make it 0-10 */
+    
+    var integrityString = '[';
+    
+    var lastIndex = 0;
+    
+    for(i=0; i<approx; i++) {
+        integrityString += '=';
+        lastIndex = i;
+    }
+    
+    for(i=lastIndex+1; i<10; i++) {
+        integrityString += '-';
+    }
+    
+    integrityString += ']';
+    
+    return integrityString + ' ' + this.health/this.maxHealth * 100 + '%';
+}
+
+
 // Transports pods between systems
 function PodVessel(pods, system, id) {
     this.pods = pods;
     this.system = system;
     this.id = id;
+    this.maxHealth = 100;
+    this.health = this.maxHealth;
 }
     
 PodVessel.prototype.moveToSystem = function(system) {
@@ -59,4 +85,29 @@ PodVessel.prototype.getName = function() {
 
 PodVessel.prototype.getStatus = function() {
     return this.getName() + " standing by.";
+}
+
+PodVessel.prototype.getIntegrity = function() {
+    var approx = roundToNearestTen(this.health)/10; /* To make it 0-10 */
+    
+    var integrityString = '[';
+    
+    var lastIndex = 0;
+    
+    for(i=0; i<approx; i++) {
+        integrityString += '=';
+        lastIndex = i;
+    }
+    
+    for(i=lastIndex+1; i<10; i++) {
+        integrityString += '-';
+    }
+    
+    integrityString += ']';
+    
+    return integrityString + ' ' + this.health/this.maxHealth * 100 + '%';
+}
+
+function roundToNearestTen(number) {
+    return Math.round(number / 10) * 10;
 }

@@ -295,7 +295,7 @@ var Terminal = Terminal || function(containerId) {
                         if(id>0 && id<=vessels.length){
                             var vessel = vessels[id-1];
                             output(vessel.getStatus());
-                            output(newline + 'Hull Integrity: ' + '[==========] 100%');
+                            output(newline + 'Hull Integrity: ' + vessel.getIntegrity());
                             output(newline + 'Location: ' + vessel.system);
                             output(newline + 'List of Seeding Pods docked on ' + vessel.getName() + ':');
                             output(newline);
@@ -320,7 +320,7 @@ var Terminal = Terminal || function(containerId) {
                         if(id>0 && id<=podList.length){
                             var pod = podList[id-1];
                             output(newline + 'Status of Pod ' + id + ':');
-                            output(newline + 'Hull Integrity: ' + '[==========] 100%');
+                            output(newline + 'Hull Integrity: ' + pod.getIntegrity());
                             output(newline + 'Location: ' + pod.getLocation());
                             output(newline + 'Forces: ' + pod.forces);
                             output(newline);
