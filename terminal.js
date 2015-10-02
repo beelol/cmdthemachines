@@ -385,7 +385,7 @@ var Terminal = Terminal || function(containerId) {
                         
                         if(desiredPlanet != null){
                             output(newline + 'Information on planet ' + desiredPlanet.getName() + ': ');
-                            output(newline + 'Number of hostile forces detected: ' + desiredPlanet.forces());
+                            output(newline + 'Number of hostile forces detected: ' + desiredPlanet.forces);
                             output(newline);                            
                         } else {                            
                             output(newline + 'Planet with name \'' + name + '\'' + ' is not available.');
