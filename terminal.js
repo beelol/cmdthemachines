@@ -94,7 +94,7 @@ var Terminal = Terminal || function(containerId) {
   const VERSION_ = '0.5.1';
     
   const CMDS_ = [
-    'help', 'about', 'units', 'info'
+    'help', 'about', 'units', 'info', 'systems'
   ];
     
   const THEMES_ = ['default'];
@@ -278,6 +278,14 @@ var Terminal = Terminal || function(containerId) {
         case 'about':
           output("You are one of two Controller units designed for the Automated Galactic Expansion Movement (AGEM). You must Colonize.");
           break;
+         case 'systems':
+          var systemNames = [];
+          for(var i=0; i<solarSystems.length; i++){
+            systemNames[i] = solarSystems[i].getName();
+          }
+          output("List of discovered solar systems:");
+          output('<div class="ls-files">' + systemNames.join('<br>') + '</div>');
+          break;  
         case 'units':
           var vesselNames = [];
           for(var i=0; i<vessels.length; i++){
@@ -317,7 +325,7 @@ var Terminal = Terminal || function(containerId) {
                 case 'pod':
                     if(args.length>1) {
                         var id = TryParseInt(args[1], 0);
-                        if(id>0 && id<=podList.length){
+                        if(id>0 && id<=podList.length) {
                             var pod = podList[id-1];
                             output(newline + 'Status of Pod ' + id + ':');
                             output(newline + 'Hull Integrity: ' + pod.getIntegrity());
@@ -334,28 +342,58 @@ var Terminal = Terminal || function(containerId) {
                 case 'system':
                     if(args.length>1) {
                         var name = args[1];
-                        if(id>0 && id<=solarSystems.length){
-                            var system = solarSystems[name];
-                            output(vessel.getStatus());
-                            output(newline + 'Hull Integrity: ' + '[==========] 100%');
-                            output(newline + 'Location: ' + vessel.system);
-                            output(newline + 'List of Seeding Pods docked on ' + vessel.getName() + ':');
-                            output(newline);
+
+                        var desiredSystem;
+                        
+                        for(var i=0; i<solarSystems.length; i++) {
+                            if(solarSystems[i].getName().toLowerCase() == name){
+                                desiredSystem = solarSystems[i];
+                                break;
+                            }
+                        }
+                        
+                        if(desiredSystem != null){
+                            output(newline + 'Information on the ' + desiredSystem.getName() + ' system: ');
+                            output(newline + 'List of all planets in the ' + desiredSystem.getName() + ' system: ');
                             
-                            var podNames = [];
-                            
-                            for(i=0; i<vessel.pods.length; i++){
-                                podNames[i] = vessel.pods[i].getName();
+                            var planetNames = [];
+                            for(var i=0; i<desiredSystem.planets.length; i++){
+                                planetNames[i] = desiredSystem.planets[i].getName();
                             }
                             
-                            output('<div class="ls-files">' + podNames.join('<br>') + '</div>');
-                        } else { // If the ID is out of bounds of array
-                            output(newline + 'Vessel with id \'' + id + '\'' + ' is not available.');
+                            output('<div class="ls-files">' + planetNames.join('<br>') + '</div>');
+                            output(newline);                            
+                        } else {                            
+                            output(newline + 'System with name \'' + name + '\'' + ' is not available.');
                         }
                     } else {
                         output('usage: info object id');
                     }
                     break;
+                case 'planet':
+                    if(args.length>1) {
+                        var name = args[1];
+
+                        var desiredPlanet;
+                        
+                        for(var i=0; i<planets.length; i++) {
+                            if(planets[i].getName().toLowerCase() == name){
+                                desiredPlanet = planets[i];
+                                break;
+                            }
+                        }
+                        
+                        if(desiredPlanet != null){
+                            output(newline + 'Information on planet ' + desiredPlanet.getName() + ': ');
+                            output(newline + 'Number of hostile forces detected: ' + desiredPlanet.forces());
+                            output(newline);                            
+                        } else {                            
+                            output(newline + 'Planet with name \'' + name + '\'' + ' is not available.');
+                        }
+                    } else {
+                        output('usage: info object id');
+                    }
+                    break; 
                 default:
                     break;
             }
