@@ -94,7 +94,7 @@ var Terminal = Terminal || function(containerId) {
   const VERSION_ = '0.5.1';
     
   const CMDS_ = [
-    'help', 'about', 'units', 'info', 'systems'
+    'help', 'about', 'units', 'info', 'systems', 'launch'
   ];
     
   const THEMES_ = ['default'];
@@ -270,7 +270,7 @@ var Terminal = Terminal || function(containerId) {
       switch (cmd) {
         case 'date':
           output((new Date()).toLocaleString());
-          break;
+          break;        
         case 'help':
           output("List of available commands:");
           output('<div class="ls-files">' + CMDS_.join('<br>') + '</div>');
@@ -294,6 +294,11 @@ var Terminal = Terminal || function(containerId) {
           output("List of available Seeding Pod Vessels:");
           output('<div class="ls-files">' + vesselNames.join('<br>') + '</div>');
           break;
+        case 'launch':
+          if(args.length>0) {
+              
+          }
+          break;                     
         case 'info':
           if(args.length>0) {
             switch(args[0]) {
@@ -304,7 +309,7 @@ var Terminal = Terminal || function(containerId) {
                             var vessel = vessels[id-1];
                             output(vessel.getStatus());
                             output(newline + 'Hull Integrity: ' + vessel.getIntegrity());
-                            output(newline + 'Location: ' + vessel.system);
+                            output(newline + 'Location: ' + vessel.getLocation() + ' System');
                             output(newline + 'List of Seeding Pods docked on ' + vessel.getName() + ':');
                             output(newline);
                             
@@ -403,6 +408,7 @@ var Terminal = Terminal || function(containerId) {
                     }
                     break; 
                 default:
+                    output('usage: info object id');
                     break;
             }
           } else {

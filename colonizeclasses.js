@@ -108,6 +108,10 @@ PodVessel.prototype.getIntegrity = function() {
     return integrityString + ' ' + this.health/this.maxHealth * 100 + '%';
 }
 
+PodVessel.prototype.getLocation = function() {
+    return this.system.getName();
+}
+
 function Biome(name) { 
     this.name = name;
 }

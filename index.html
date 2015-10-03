@@ -95,7 +95,9 @@ function toggleHelp() {
   })();
 </script>
 
-<script>
+<script> 
+    const BIOMES = [new Biome("Ocean"), new Biome("Desert"), new Biome("Swamp"), new Biome("Tundra"),
+                new Biome("Plains"), new Biome("Forest"), new Biome("Marshland")]
     
     // Check if an array contains an object.
     function arrayContains(obj, array) {
@@ -105,10 +107,13 @@ function toggleHelp() {
             }
         }
         return false;
-    }
+    }    
     
-    const BIOMES = [new Biome("Ocean"), new Biome("Desert"), new Biome("Swamp"), new Biome("Tundra"),
-                    new Biome("Plains"), new Biome("Forest"), new Biome("Marshland")]
+    function arrayRemoveAt(index, array) {
+        if (index > -1) {
+            array.splice(index, 1);
+        }
+    }    
     
     var numSolarSystems = getRandomInt(30, 40);
     
@@ -155,6 +160,8 @@ function toggleHelp() {
     var podList = [];
     var vessels = [];
 
+    var possibleSystems = solarSystems.slice();
+    
     for(i=0; i<numVessels; i++){  
         var pods = [];
         for(j=0; j<numPodPerVessel; j++){
@@ -162,7 +169,12 @@ function toggleHelp() {
             pods[j] = new Pod(getRandomInt(100, 1000), podIndex + 1, i);
             podList[podIndex] = pods[j];
         }
-        vessels[i] = new PodVessel(pods.slice(0, pods.length), null, i + 1);
+        
+        var system = possibleSystems[getRandomInt(0, solarSystems.length)];
+
+        arrayRemoveAt(possibleSystems.indexOf(system), possibleSystems);
+        
+        vessels[i] = new PodVessel(pods.slice(0, pods.length), system, i + 1);
     }
     
 </script>
