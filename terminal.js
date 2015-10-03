@@ -385,6 +385,14 @@ var Terminal = Terminal || function(containerId) {
                         
                         if(desiredPlanet != null){
                             output(newline + 'Information on planet ' + desiredPlanet.getName() + ': ');
+                            output(newline + 'List of all biomes detected on planet ' + desiredPlanet.getName() + ': ');
+                            
+                            var biomeNames = [];
+                            for(var i=0; i<desiredPlanet.biomes.length; i++){
+                                biomeNames[i] = desiredPlanet.biomes[i].getName();
+                            }
+                            
+                            output('<div class="ls-files">' + biomeNames.join('<br>') + '</div>');
                             output(newline + 'Number of hostile forces detected: ' + desiredPlanet.forces);
                             output(newline);                            
                         } else {                            

@@ -32,6 +32,8 @@ Author: Eric Bidelman (ericbidelman@chromium.org)
 <div id="container"></div>
 <!--<div class="crt bottom"></div>-->
     
+
+    
 <script src="parsefunctions.js"></script>  
 <script src="namegenerator.js"></script>
 <script src="colonizeclasses.js"></script>
@@ -95,19 +97,50 @@ function toggleHelp() {
 
 <script>
     
+    // Check if an array contains an object.
+    function arrayContains(obj, array) {
+        for(l=0; l<array.length; l++){
+            if(array[l] === obj){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    const BIOMES = [new Biome("Ocean"), new Biome("Desert"), new Biome("Swamp"), new Biome("Tundra"),
+                    new Biome("Plains"), new Biome("Forest"), new Biome("Marshland")]
+    
     var numSolarSystems = getRandomInt(30, 40);
     
     var solarSystems = [];
     
     var planets = [];        
     
+    // Generate solar systems
     for(i=0; i<numSolarSystems; i++) {   
         var numPlanets = getRandomInt(6, 16);
         
         var currentSystemPlanets = [];    
         
-        for(j=0; j<numPlanets; j++) {            
-            currentSystemPlanets[j] = new Planet(generateName(), getRandomInt(100, 1500));
+        // Generate all planets
+        for(j=0; j<numPlanets; j++) {     
+            var chosenIndices = [];
+            
+            var numBiomes = getRandomInt(1, 5);                    
+            
+            var p = new Planet(generateName(), getRandomInt(100, 1500));     
+            
+            // Generate biomes for each planet
+            for(k=0; k<numBiomes; k++){
+                var index = getRandomInt(0, BIOMES.length-1);
+                
+                if(!arrayContains(index, chosenIndices)){
+                    p.biomes.push(BIOMES[k]);
+                }
+                chosenIndices.push(index);
+            }
+            
+            currentSystemPlanets[j] = p;
             
             planets.push(currentSystemPlanets[j]);                    
         }
@@ -115,10 +148,6 @@ function toggleHelp() {
         solarSystems[i] = new SolarSystem(generateName(), currentSystemPlanets);            
     }    
     
-//    for(i=0; i<solarSystems.length; i++) {
-//        console.log(solarSystems[i].getName());
-//    }
-//    
     // Make a list of pod vessels
     var numVessels = getRandomInt(10, 20);
     var numPodPerVessel = 10;
@@ -135,6 +164,7 @@ function toggleHelp() {
         }
         vessels[i] = new PodVessel(pods.slice(0, pods.length), null, i + 1);
     }
+    
 </script>
     
 </body>

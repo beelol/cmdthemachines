@@ -2,12 +2,12 @@
 function Planet(name, forces) {
     this.name = name;
     this.forces = forces;
+    this.biomes = [];
 }
     
 Planet.prototype.getName = function() {
     return this.name;
 }
-
 
 // Solar system containing colonizable planets
 function SolarSystem(name, planets) {
@@ -106,6 +106,14 @@ PodVessel.prototype.getIntegrity = function() {
     integrityString += ']';
     
     return integrityString + ' ' + this.health/this.maxHealth * 100 + '%';
+}
+
+function Biome(name) { 
+    this.name = name;
+}
+
+Biome.prototype.getName = function() {
+    return this.name;
 }
 
 function roundToNearestTen(number) {
