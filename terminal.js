@@ -94,7 +94,7 @@ var Terminal = Terminal || function(containerId) {
   const VERSION_ = '0.5.1';
     
   const CMDS_ = [
-    'help', 'about', 'units', 'info', 'systems', 'launch'
+    'help', 'about', 'units', 'info', 'systems', 'launch', 'orbit', 'jump'
   ];
     
   const THEMES_ = ['default'];
@@ -294,9 +294,66 @@ var Terminal = Terminal || function(containerId) {
           output("List of available Seeding Pod Vessels:");
           output('<div class="ls-files">' + vesselNames.join('<br>') + '</div>');
           break;
-        case 'launch':
+        case 'orbit':
           if(args.length>0) {
-              
+              switch(args[0]) {
+                  case 'vessel':
+                    if(args.length>1) {
+                        var id = TryParseInt(args[1], 0);
+                        if(id>0 && id<=vessels.length) {
+                            var vessel = vessels[id-1];
+                            
+                            if(args.length>2) {
+                                var planetName = args[2].toString();
+                                vessel.targetPlanet = getPlanet(planetName);
+                                if(vessel.targetPlanet == null){
+                                    output('Planet ' + planetName + ' is not available.');
+                                } else {
+                                    output(newline + vessel.getName() + ' now orbiting planet ' + vessel.targetPlanet.getName() + '.' );
+                                    output(newline);
+                                }
+                            } else {
+                                output('usage: orbit vessel id planet');
+                            }
+                                                        
+                        } else { // If the ID is out of bounds of array
+                            output(newline + 'Vessel with id \'' + id + '\'' + ' is not available.');
+                        }
+                    } else {
+                        output('usage: orbit vessel id planet');
+                    }
+                    break;
+                  default:
+                      output('usage: orbit vessel id planet');
+                      break;
+              }                  
+          } else {
+            output('usage: orbit vessel id planet');
+          }
+          break;        
+        case 'launch':
+          if(args.length>1) {
+            var id = TryParseInt(args[1], 0);
+            if(id>0 && id<=podList.length) {
+                var pod = podList[id-1];
+                var podVessel = vessels[pod.vesselID];
+                
+                var planet = podVessel.targetPlanet;
+                pod.planet = planet;
+                planet.pods.push(pod);
+                
+                arrayRemove(pod, podVessel.pods);
+                
+                output(newline + 'Vessel ' + vesselID + ' launch sequence initiated.');
+                output(newline + 'Pod ' + id + ' launch successful.');
+                output(newline + 'Pod standing by on planet: ' + pod.planet.getName());
+                output(newline);
+                
+            } else { // If the ID is out of bounds of array
+                output(newline + 'Pod with id \'' + id + '\'' + ' is not available.');
+            }
+          } else {
+            output('usage: launch pod id');
           }
           break;                     
         case 'info':
@@ -309,7 +366,7 @@ var Terminal = Terminal || function(containerId) {
                             var vessel = vessels[id-1];
                             output(vessel.getStatus());
                             output(newline + 'Hull Integrity: ' + vessel.getIntegrity());
-                            output(newline + 'Location: ' + vessel.getLocation() + ' System');
+                            output(newline + vessel.getLocation());
                             output(newline + 'List of Seeding Pods docked on ' + vessel.getName() + ':');
                             output(newline);
                             

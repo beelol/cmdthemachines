@@ -109,11 +109,13 @@ function toggleHelp() {
         return false;
     }    
     
-    function arrayRemoveAt(index, array) {
-        if (index > -1) {
-            array.splice(index, 1);
+    function arrayRemove(item, arr) {
+        for(var i = arr.length; i--;) {
+            if(arr[i] === item) {
+                arr.splice(i, 1);
+            }
         }
-    }    
+    }
     
     var numSolarSystems = getRandomInt(30, 40);
     
@@ -150,7 +152,7 @@ function toggleHelp() {
             planets.push(currentSystemPlanets[j]);                    
         }
         
-        solarSystems[i] = new SolarSystem(generateName(), currentSystemPlanets);            
+        solarSystems[i] = new SolarSystem(generateName(), currentSystemPlanets);    
     }    
     
     // Make a list of pod vessels
@@ -162,7 +164,7 @@ function toggleHelp() {
 
     var possibleSystems = solarSystems.slice();
     
-    for(i=0; i<numVessels; i++){  
+    for(i=0; i<numVessels; i++) {  
         var pods = [];
         for(j=0; j<numPodPerVessel; j++){
             var podIndex = j + i * numPodPerVessel;
@@ -170,11 +172,23 @@ function toggleHelp() {
             podList[podIndex] = pods[j];
         }
         
-        var system = possibleSystems[getRandomInt(0, solarSystems.length)];
-
-        arrayRemoveAt(possibleSystems.indexOf(system), possibleSystems);
+        var system = possibleSystems[getRandomInt(0, possibleSystems.length-1)];    
         
         vessels[i] = new PodVessel(pods.slice(0, pods.length), system, i + 1);
+                    
+        system.vessels.push(vessels[i]);
+
+        arrayRemove(system, possibleSystems);
+    }
+    
+        
+    function getPlanet(name) {
+        for(i=0; i<planets.length; i++){
+            if(planets[i].getName().toLowerCase() == name) {
+                return planets[i];
+            }
+        }        
+        return null;
     }
     
 </script>

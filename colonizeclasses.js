@@ -3,6 +3,7 @@ function Planet(name, forces) {
     this.name = name;
     this.forces = forces;
     this.biomes = [];
+    this.pods = [];
 }
     
 Planet.prototype.getName = function() {
@@ -13,6 +14,7 @@ Planet.prototype.getName = function() {
 function SolarSystem(name, planets) {
     this.name = name;
     this.planets = planets;
+    this.vessels = [];
 }
 
 SolarSystem.prototype.getName = function() {
@@ -40,7 +42,7 @@ Pod.prototype.getLocation = function() {
         return 'Docked on ' + vessels[this.vesselID].getName() + '.';
     }
     else{
-        return 'Deployed on ' + this.planet + '.';
+        return 'Deployed on planet ' + this.planet.getName() + '.';
     }
 }
 
@@ -73,6 +75,7 @@ function PodVessel(pods, system, id) {
     this.id = id;
     this.maxHealth = 100;
     this.health = this.maxHealth;
+    this.targetPlanet = null;
 }
     
 PodVessel.prototype.moveToSystem = function(system) {
@@ -109,7 +112,11 @@ PodVessel.prototype.getIntegrity = function() {
 }
 
 PodVessel.prototype.getLocation = function() {
-    return this.system.getName();
+    if(this.targetPlanet == null) {
+        return "Location: " + this.system.getName() + " System.";
+    }
+    
+    return 'Location: Orbiting planet ' + this.targetPlanet.getName() + ' in ' + this.system.getName() + ' System.';
 }
 
 function Biome(name) { 
