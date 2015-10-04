@@ -168,13 +168,10 @@ function toggleHelp() {
 
     var possibleSystems = solarSystems.slice();
     
+    var podIndex = 0;
+    
     for(i=0; i<numVessels; i++) {  
         var pods = [];
-        for(j=0; j<numPodPerVessel; j++){
-            var podIndex = j + i * numPodPerVessel;
-            pods[j] = new Pod(getRandomInt(100, 1000), podIndex + 1, i);
-            podList[podIndex] = pods[j];
-        }
         
         var system = possibleSystems[getRandomInt(0, possibleSystems.length-1)];    
         
@@ -183,8 +180,18 @@ function toggleHelp() {
         system.vessels.push(vessels[i]);
 
         arrayRemove(system, possibleSystems);
-    }
-    
+        
+        for(j=0; j<numPodPerVessel; j++){
+            var podIndex = j + i * numPodPerVessel;
+            
+            var pod = new Pod(getRandomInt(100, 1000), podIndex + 1, vessels[i]);
+            
+            podList.push(pod);            
+            vessels[i].pods.push(pod);
+            
+            podIndex++;
+        }                
+    }    
         
     function getPlanet(name) {
         for(i=0; i<planets.length; i++){

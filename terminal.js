@@ -215,6 +215,12 @@ var Terminal = Terminal || function(containerId) {
                             var planetName = args[2].toString();
                             var targetPlanet = getPlanet(planetName);
                             
+                            if(targetPlanet === vessel.targetPlanet) {
+                                output(newline + vessel.getName() + ': orbit unsuccessful. ');
+                                output(newline + vessel.getName() + ' is already orbiting that planet.');
+                                return;
+                            }
+                            
                             if(targetPlanet == null) {
                                 output('Planet ' + planetName + ' is not available.');
                                 return;
@@ -225,7 +231,7 @@ var Terminal = Terminal || function(containerId) {
                                 output(newline + vessel.getName() + ' now orbiting planet ' + vessel.targetPlanet.getName() + '.');
                                 output(newline);
                             } else {
-                                output(newline + 'Orbit unsuccessful.');
+                                output(newline + vessel.getName() + ': orbit unsuccessful.');
                                 output(newline + 'Planet ' + targetPlanet.getName() + ' is in the ' + targetPlanet.system.getName() + ' System.');
                                 output(newline +  vessel.getName() + ' must jump to the ' + targetPlanet.system.getName() + ' System before orbiting ' + targetPlanet.getName() + '.');
                                 output(newline);
@@ -256,21 +262,29 @@ var Terminal = Terminal || function(containerId) {
         var id = TryParseInt(args[1], 0);
         if(id>0 && id<=podList.length) {
             var pod = podList[id-1];
-            var podVessel = vessels[pod.vesselID];
+            var podVessel = pod.vessel;
+            
+            if(pod.docked == false){
+                output(newline + pod.vessel.getName() + ' launch sequence initiated.');
+                output(newline + pod.getName() + ' launch unsuccessful.');
+                output(newline + pod.getName() + ' is already deployed on planet ' + pod.planet.getName() + '.');
+                output(newline);
+                return;
+            }
             
             if(podVessel.targetPlanet == null){
-                output(newline + 'Vessel ' + pod.vesselID + ' launch sequence initiated.');
-                output(newline + 'Pod ' + id + ' launch unsuccessful.');
-                output(newline + 'Vessel ' + pod.vesselID + ' is not in orbit of any planet.' );
+                output(newline + pod.vessel.getName() + ' launch sequence initiated.');
+                output(newline + pod.getName() +  ' launch unsuccessful.');
+                output(newline + pod.vessel.getName() + ' is not in orbit of any planet.' );
                 output(newline);
                 return;
             } else {
                 pod.launch(podVessel.targetPlanet);
             }
 
-            output(newline + 'Vessel ' + pod.vesselID + ' launch sequence initiated.');
+            output(newline + pod.vessel.getName() + ' launch sequence initiated.');
             output(newline + 'Pod ' + id + ' launch successful.');
-            output(newline + 'Pod standing by on planet: ' + pod.planet.getName());
+            output(newline + 'Pod standing by on planet ' + pod.planet.getName() + '.');
             output(newline);
 
         } else { // If the ID is out of bounds of array
@@ -349,6 +363,23 @@ var Terminal = Terminal || function(containerId) {
                         }
 
                         output('<div class="ls-files">' + planetNames.join('<br>') + '</div>');
+                        
+                        output(newline);
+                        
+                        if(desiredSystem.vessels.length>0) {
+                            
+                        output(newline + 'List of all controlled pod vessels in the ' + desiredSystem.getName() + ' system: ');
+                                                                        
+                            var vesselNames = [];
+
+                            for(i=0; i<desiredSystem.vessels.length; i++){
+                                vesselNames[i] = desiredSystem.vessels[i].getName();
+                            }
+
+                            output('<div class="ls-files">' + vesselNames.join('<br>') + '</div>');
+
+                        }
+                        
                         output(newline);                            
                     } else {                            
                         output(newline + 'System with name \'' + name + '\'' + ' is not available.');
@@ -373,7 +404,22 @@ var Terminal = Terminal || function(containerId) {
                     if(desiredPlanet != null){
                         output(newline + 'Information on planet ' + desiredPlanet.getName() + ': ');
                         output(newline + 'List of all biomes detected on planet ' + desiredPlanet.getName() + ': ');
+                        
+                        if(desiredPlanet.pods.length>0) {
+                        
+                            output(newline + 'List of Seeding Pods deployed on planet ' + desiredPlanet.getName() + ':');
+                            output(newline);
 
+                            var podNames = [];
+
+                            for(i=0; i<desiredPlanet.pods.length; i++){
+                                podNames[i] = '[' + desiredPlanet.pods[i].getName() + ']';
+                            }
+
+                            output('<div class="ls-files">' + podNames.join('<br>') + '</div>');
+                            
+                        }
+                        
                         var biomeNames = [];
                         for(var i=0; i<desiredPlanet.biomes.length; i++){
                             biomeNames[i] = desiredPlanet.biomes[i].getName();
@@ -399,6 +445,61 @@ var Terminal = Terminal || function(containerId) {
   }
     
   function cmd_jump(args) {
+  if(args.length>0) {
+          switch(args[0]) {
+              case 'vessel':
+                if(args.length>1) {
+                    var id = TryParseInt(args[1], 0);
+                    if(id>0 && id<=vessels.length) {
+                        var vessel = vessels[id-1];
+
+                        if(args.length>2) {                            
+                            var desiredSystem;
+
+                            for(var i=0; i<solarSystems.length; i++) {
+                                if(solarSystems[i].getName().toLowerCase() == args[2]){
+                                    desiredSystem = solarSystems[i];
+                                    break;
+                                }
+                            }
+                            
+                            if(desiredSystem === vessel.system) {
+                                output(newline + vessel.getName() + ': hyperspace jump unsuccessful. ');
+                                output(newline + vessel.getName() + ' is already in that system.');
+                                return;
+                            }
+                            
+                            if(desiredSystem == null) {
+                                output(newline + vessel.getName() + ': hyperspace jump unsuccessful. ');
+                                output(newline + 'System with name \'' + name + '\'' + ' is not available.');
+                                return;
+                            }
+                            
+                            output(newline + vessel.getName() + ': hyperspace jump initializing... ');
+                            output(newline + vessel.getName() + ': hyperspace jump successful. ');
+                            vessel.jump(desiredSystem);
+                            
+                            output(newline + vessel.getName() + ' has relocated to the ' + vessel.system.getName() + ' System.');
+                            output(newline + vessel.getName() + ' standing by.');
+                            
+                        } else {
+                            output('usage: jump vessel id system');
+                        }
+
+                    } else { // If the ID is out of bounds of array
+                        output(newline + 'Vessel with id \'' + id + '\'' + ' is not available.');
+                    }
+                } else {
+                    output('usage: jump vessel id system');
+                }
+                break;
+              default:
+                  output('usage: jump vessel id system');
+                  break;
+          }                  
+      } else {
+        output('usage: jump vessel id system');
+      }          
   }
     
   function inputTextClick_(e) {
@@ -514,7 +615,10 @@ var Terminal = Terminal || function(containerId) {
           break;                     
         case 'info':
           cmd_info(args);
-          break;            
+          break; 
+        case 'jump':
+          cmd_jump(args);
+          break;   
         case 'version':
         case 'ver':
           output(VERSION_);

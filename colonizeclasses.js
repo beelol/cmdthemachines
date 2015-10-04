@@ -24,12 +24,12 @@ SolarSystem.prototype.getName = function() {
 
 
 // Used to colonize a planet
-function Pod (forces, id, vesselID){
+function Pod (forces, id, vessel){
     this.forces = forces;
     this.id = id;
-    this.vesselID = vesselID;
+    this.vessel = vessel;
     this.docked = true;
-    this.planet = 'none';
+    this.planet = null;
     this.maxHealth = 100;
     this.health = this.maxHealth;
 }
@@ -40,7 +40,7 @@ Pod.prototype.getName = function() {
 
 Pod.prototype.getLocation = function() {
     if(this.docked = true){
-        return 'Docked on ' + vessels[this.vesselID].getName() + '.';
+        return 'Docked on ' + this.vessel.getName() + '.';
     }
     else{
         return 'Deployed on planet ' + this.planet.getName() + '.';
@@ -69,11 +69,13 @@ Pod.prototype.getIntegrity = function() {
 }
 
 Pod.prototype.launch = function(planet) {
-    var podVessel = vessels[this.vesselID];
     this.planet = planet;
+    
     planet.pods.push(this);
 
-    arrayRemove(this, podVessel.pods);
+    arrayRemove(this, this.vessel.pods);
+    
+    this.docked = false;
 }
 
 // Transports pods between systems
@@ -129,6 +131,13 @@ PodVessel.prototype.getLocation = function() {
 
 PodVessel.prototype.orbit = function(planet) {
     this.targetPlanet = planet;
+}
+
+PodVessel.prototype.jump = function(system) {
+    arrayRemove(this, this.system.vessels);
+    this.system = system;
+    system.vessels.push(this);
+    this.targetPlanet = null;
 }
 
 function Biome(name) { 
