@@ -174,7 +174,233 @@ var Terminal = Terminal || function(containerId) {
   /*window.addEventListener('beforeunload', function(e) {
     return "Don't leave me!";
   }, false);*/
+    
+  function cmd_help(args) {
+    output("List of available commands:");
+    output('<div class="ls-files">' + CMDS_.join('<br>') + '</div>');  
+  }
+    
+  function cmd_about(args) {
+     output("You are one of two Controller units designed for the Automated Galactic Expansion Movement (AGEM). You must Colonize."); 
+  }
+    
+  function cmd_systems(args) {
+      var systemNames = [];
+      for(var i=0; i<solarSystems.length; i++){
+        systemNames[i] = solarSystems[i].getName();
+      }
+      output("List of discovered solar systems:");
+      output('<div class="ls-files">' + systemNames.join('<br>') + '</div>');  
+  }
+    
+  function cmd_units(args) {
+      var vesselNames = [];
+      for(var i=0; i<vessels.length; i++){
+        vesselNames[i] = vessels[i].getName();
+      }
+      output("List of available Seeding Pod Vessels:");
+      output('<div class="ls-files">' + vesselNames.join('<br>') + '</div>');
+  }
+    
+  function cmd_orbit(args) {
+      if(args.length>0) {
+          switch(args[0]) {
+              case 'vessel':
+                if(args.length>1) {
+                    var id = TryParseInt(args[1], 0);
+                    if(id>0 && id<=vessels.length) {
+                        var vessel = vessels[id-1];
 
+                        if(args.length>2) {
+                            var planetName = args[2].toString();
+                            var targetPlanet = getPlanet(planetName);
+                            
+                            if(targetPlanet == null) {
+                                output('Planet ' + planetName + ' is not available.');
+                                return;
+                            }
+                                                            
+                            if(arrayContains(targetPlanet, vessel.system.planets)) {
+                                vessel.orbit(targetPlanet);
+                                output(newline + vessel.getName() + ' now orbiting planet ' + vessel.targetPlanet.getName() + '.');
+                                output(newline);
+                            } else {
+                                output(newline + 'Orbit unsuccessful.');
+                                output(newline + 'Planet ' + targetPlanet.getName() + ' is in the ' + targetPlanet.system.getName() + ' System.');
+                                output(newline +  vessel.getName() + ' must jump to the ' + targetPlanet.system.getName() + ' System before orbiting ' + targetPlanet.getName() + '.');
+                                output(newline);
+                            }
+                            
+                        } else {
+                            output('usage: orbit vessel id planet');
+                        }
+
+                    } else { // If the ID is out of bounds of array
+                        output(newline + 'Vessel with id \'' + id + '\'' + ' is not available.');
+                    }
+                } else {
+                    output('usage: orbit vessel id planet');
+                }
+                break;
+              default:
+                  output('usage: orbit vessel id planet');
+                  break;
+          }                  
+      } else {
+        output('usage: orbit vessel id planet');
+      }
+  }
+    
+  function cmd_launch(args) {
+      if(args.length>1) {
+        var id = TryParseInt(args[1], 0);
+        if(id>0 && id<=podList.length) {
+            var pod = podList[id-1];
+            var podVessel = vessels[pod.vesselID];
+            
+            if(podVessel.targetPlanet == null){
+                output(newline + 'Vessel ' + pod.vesselID + ' launch sequence initiated.');
+                output(newline + 'Pod ' + id + ' launch unsuccessful.');
+                output(newline + 'Vessel ' + pod.vesselID + ' is not in orbit of any planet.' );
+                output(newline);
+                return;
+            } else {
+                pod.launch(podVessel.targetPlanet);
+            }
+
+            output(newline + 'Vessel ' + pod.vesselID + ' launch sequence initiated.');
+            output(newline + 'Pod ' + id + ' launch successful.');
+            output(newline + 'Pod standing by on planet: ' + pod.planet.getName());
+            output(newline);
+
+        } else { // If the ID is out of bounds of array
+            output(newline + 'Pod with id \'' + id + '\'' + ' is not available.');
+        }
+      } else {
+        output('usage: launch pod id');
+      }
+  }
+    
+  function cmd_info(args) {
+    if(args.length>0) {
+        switch(args[0]) {
+            case 'vessel':
+                if(args.length>1) {
+                    var id = TryParseInt(args[1], 0);
+                    if(id>0 && id<=vessels.length){
+                        var vessel = vessels[id-1];
+                        output(vessel.getStatus());
+                        output(newline + 'Hull Integrity: ' + vessel.getIntegrity());
+                        output(newline + vessel.getLocation());
+                        output(newline + 'List of Seeding Pods docked on ' + vessel.getName() + ':');
+                        output(newline);
+
+                        var podNames = [];
+
+                        for(i=0; i<vessel.pods.length; i++){
+                            podNames[i] = '[' + vessel.pods[i].getName() + ']';
+                        }
+
+                        output('<div class="ls-files">' + podNames.join('<br>') + '</div>');
+                    } else { // If the ID is out of bounds of array
+                        output(newline + 'Vessel with id \'' + id + '\'' + ' is not available.');
+                    }
+                } else {
+                    output('usage: info object id');
+                }
+                break;
+            case 'pod':
+                if(args.length>1) {
+                    var id = TryParseInt(args[1], 0);
+                    if(id>0 && id<=podList.length) {
+                        var pod = podList[id-1];
+                        output(newline + 'Status of Pod ' + id + ':');
+                        output(newline + 'Hull Integrity: ' + pod.getIntegrity());
+                        output(newline + 'Location: ' + pod.getLocation());
+                        output(newline + 'Forces: ' + pod.forces);
+                        output(newline);
+                    } else { // If the ID is out of bounds of array
+                        output(newline + 'Pod with id \'' + id + '\'' + ' is not available.');
+                    }
+                } else {
+                    output('usage: info object id');
+                }
+                break;
+            case 'system':
+                if(args.length>1) {
+                    var name = args[1];
+
+                    var desiredSystem;
+
+                    for(var i=0; i<solarSystems.length; i++) {
+                        if(solarSystems[i].getName().toLowerCase() == name){
+                            desiredSystem = solarSystems[i];
+                            break;
+                        }
+                    }
+
+                    if(desiredSystem != null){
+                        output(newline + 'Information on the ' + desiredSystem.getName() + ' system: ');
+                        output(newline + 'List of all planets in the ' + desiredSystem.getName() + ' system: ');
+
+                        var planetNames = [];
+                        for(var i=0; i<desiredSystem.planets.length; i++){
+                            planetNames[i] = desiredSystem.planets[i].getName();
+                        }
+
+                        output('<div class="ls-files">' + planetNames.join('<br>') + '</div>');
+                        output(newline);                            
+                    } else {                            
+                        output(newline + 'System with name \'' + name + '\'' + ' is not available.');
+                    }
+                } else {
+                    output('usage: info object id');
+                }
+                break;
+            case 'planet':
+                if(args.length>1) {
+                    var name = args[1];
+
+                    var desiredPlanet;
+
+                    for(var i=0; i<planets.length; i++) {
+                        if(planets[i].getName().toLowerCase() == name){
+                            desiredPlanet = planets[i];
+                            break;
+                        }
+                    }
+
+                    if(desiredPlanet != null){
+                        output(newline + 'Information on planet ' + desiredPlanet.getName() + ': ');
+                        output(newline + 'List of all biomes detected on planet ' + desiredPlanet.getName() + ': ');
+
+                        var biomeNames = [];
+                        for(var i=0; i<desiredPlanet.biomes.length; i++){
+                            biomeNames[i] = desiredPlanet.biomes[i].getName();
+                        }
+
+                        output('<div class="ls-files">' + biomeNames.join('<br>') + '</div>');
+                        output(newline + 'Number of hostile forces detected: ' + desiredPlanet.forces);
+                        output(newline);                            
+                    } else {                            
+                        output(newline + 'Planet with name \'' + name + '\'' + ' is not available.');
+                    }
+                } else {
+                    output('usage: info object id');
+                }
+                break; 
+            default:
+                output('usage: info object id');
+                break;
+        }
+      } else {
+        output('usage: info object id');
+      }  
+  }
+    
+  function cmd_jump(args) {
+  }
+    
   function inputTextClick_(e) {
     this.value = this.value;
   }
@@ -226,7 +452,7 @@ var Terminal = Terminal || function(containerId) {
   }
 
   function processNewCommand_(e) {
-
+      
     // Beep on backspace and no value on command line.
 //    if (!this.value && e.keyCode == 8) {
 //      bell_.stop();
@@ -267,330 +493,28 @@ var Terminal = Terminal || function(containerId) {
         args = args.splice(1); // Remove cmd from arg list.
       }
 
-      switch (cmd) {
-        case 'date':
-          output((new Date()).toLocaleString());
-          break;        
+      switch (cmd) {       
         case 'help':
-          output("List of available commands:");
-          output('<div class="ls-files">' + CMDS_.join('<br>') + '</div>');
+          cmd_help(args);
           break;
         case 'about':
-          output("You are one of two Controller units designed for the Automated Galactic Expansion Movement (AGEM). You must Colonize.");
+          cmd_about(args);
           break;
          case 'systems':
-          var systemNames = [];
-          for(var i=0; i<solarSystems.length; i++){
-            systemNames[i] = solarSystems[i].getName();
-          }
-          output("List of discovered solar systems:");
-          output('<div class="ls-files">' + systemNames.join('<br>') + '</div>');
+          cmd_systems(args);
           break;  
         case 'units':
-          var vesselNames = [];
-          for(var i=0; i<vessels.length; i++){
-            vesselNames[i] = vessels[i].getName();
-          }
-          output("List of available Seeding Pod Vessels:");
-          output('<div class="ls-files">' + vesselNames.join('<br>') + '</div>');
+          cmd_units(args);
           break;
         case 'orbit':
-          if(args.length>0) {
-              switch(args[0]) {
-                  case 'vessel':
-                    if(args.length>1) {
-                        var id = TryParseInt(args[1], 0);
-                        if(id>0 && id<=vessels.length) {
-                            var vessel = vessels[id-1];
-                            
-                            if(args.length>2) {
-                                var planetName = args[2].toString();
-                                vessel.targetPlanet = getPlanet(planetName);
-                                if(vessel.targetPlanet == null){
-                                    output('Planet ' + planetName + ' is not available.');
-                                } else {
-                                    output(newline + vessel.getName() + ' now orbiting planet ' + vessel.targetPlanet.getName() + '.' );
-                                    output(newline);
-                                }
-                            } else {
-                                output('usage: orbit vessel id planet');
-                            }
-                                                        
-                        } else { // If the ID is out of bounds of array
-                            output(newline + 'Vessel with id \'' + id + '\'' + ' is not available.');
-                        }
-                    } else {
-                        output('usage: orbit vessel id planet');
-                    }
-                    break;
-                  default:
-                      output('usage: orbit vessel id planet');
-                      break;
-              }                  
-          } else {
-            output('usage: orbit vessel id planet');
-          }
+          cmd_orbit(args);
           break;        
         case 'launch':
-          if(args.length>1) {
-            var id = TryParseInt(args[1], 0);
-            if(id>0 && id<=podList.length) {
-                var pod = podList[id-1];
-                var podVessel = vessels[pod.vesselID];
-                
-                var planet = podVessel.targetPlanet;
-                pod.planet = planet;
-                planet.pods.push(pod);
-                
-                arrayRemove(pod, podVessel.pods);
-                
-                output(newline + 'Vessel ' + vesselID + ' launch sequence initiated.');
-                output(newline + 'Pod ' + id + ' launch successful.');
-                output(newline + 'Pod standing by on planet: ' + pod.planet.getName());
-                output(newline);
-                
-            } else { // If the ID is out of bounds of array
-                output(newline + 'Pod with id \'' + id + '\'' + ' is not available.');
-            }
-          } else {
-            output('usage: launch pod id');
-          }
+          cmd_launch(args);
           break;                     
         case 'info':
-          if(args.length>0) {
-            switch(args[0]) {
-                case 'vessel':
-                    if(args.length>1) {
-                        var id = TryParseInt(args[1], 0);
-                        if(id>0 && id<=vessels.length){
-                            var vessel = vessels[id-1];
-                            output(vessel.getStatus());
-                            output(newline + 'Hull Integrity: ' + vessel.getIntegrity());
-                            output(newline + vessel.getLocation());
-                            output(newline + 'List of Seeding Pods docked on ' + vessel.getName() + ':');
-                            output(newline);
-                            
-                            var podNames = [];
-                            
-                            for(i=0; i<vessel.pods.length; i++){
-                                podNames[i] = '[' + vessel.pods[i].getName() + ']';
-                            }
-                            
-                            output('<div class="ls-files">' + podNames.join('<br>') + '</div>');
-                        } else { // If the ID is out of bounds of array
-                            output(newline + 'Vessel with id \'' + id + '\'' + ' is not available.');
-                        }
-                    } else {
-                        output('usage: info object id');
-                    }
-                    break;
-                case 'pod':
-                    if(args.length>1) {
-                        var id = TryParseInt(args[1], 0);
-                        if(id>0 && id<=podList.length) {
-                            var pod = podList[id-1];
-                            output(newline + 'Status of Pod ' + id + ':');
-                            output(newline + 'Hull Integrity: ' + pod.getIntegrity());
-                            output(newline + 'Location: ' + pod.getLocation());
-                            output(newline + 'Forces: ' + pod.forces);
-                            output(newline);
-                        } else { // If the ID is out of bounds of array
-                            output(newline + 'Pod with id \'' + id + '\'' + ' is not available.');
-                        }
-                    } else {
-                        output('usage: info object id');
-                    }
-                    break;
-                case 'system':
-                    if(args.length>1) {
-                        var name = args[1];
-
-                        var desiredSystem;
-                        
-                        for(var i=0; i<solarSystems.length; i++) {
-                            if(solarSystems[i].getName().toLowerCase() == name){
-                                desiredSystem = solarSystems[i];
-                                break;
-                            }
-                        }
-                        
-                        if(desiredSystem != null){
-                            output(newline + 'Information on the ' + desiredSystem.getName() + ' system: ');
-                            output(newline + 'List of all planets in the ' + desiredSystem.getName() + ' system: ');
-                            
-                            var planetNames = [];
-                            for(var i=0; i<desiredSystem.planets.length; i++){
-                                planetNames[i] = desiredSystem.planets[i].getName();
-                            }
-                            
-                            output('<div class="ls-files">' + planetNames.join('<br>') + '</div>');
-                            output(newline);                            
-                        } else {                            
-                            output(newline + 'System with name \'' + name + '\'' + ' is not available.');
-                        }
-                    } else {
-                        output('usage: info object id');
-                    }
-                    break;
-                case 'planet':
-                    if(args.length>1) {
-                        var name = args[1];
-
-                        var desiredPlanet;
-                        
-                        for(var i=0; i<planets.length; i++) {
-                            if(planets[i].getName().toLowerCase() == name){
-                                desiredPlanet = planets[i];
-                                break;
-                            }
-                        }
-                        
-                        if(desiredPlanet != null){
-                            output(newline + 'Information on planet ' + desiredPlanet.getName() + ': ');
-                            output(newline + 'List of all biomes detected on planet ' + desiredPlanet.getName() + ': ');
-                            
-                            var biomeNames = [];
-                            for(var i=0; i<desiredPlanet.biomes.length; i++){
-                                biomeNames[i] = desiredPlanet.biomes[i].getName();
-                            }
-                            
-                            output('<div class="ls-files">' + biomeNames.join('<br>') + '</div>');
-                            output(newline + 'Number of hostile forces detected: ' + desiredPlanet.forces);
-                            output(newline);                            
-                        } else {                            
-                            output(newline + 'Planet with name \'' + name + '\'' + ' is not available.');
-                        }
-                    } else {
-                        output('usage: info object id');
-                    }
-                    break; 
-                default:
-                    output('usage: info object id');
-                    break;
-            }
-          } else {
-            output('usage: info object id');
-          }
-          break;
-              
-//          var runAction = function(cmd, srcDirEntry, destDirEntry, opt_newName) {
-//            var newName = opt_newName || null;
-//            if (cmd == 'mv') {
-//                srcDirEntry.moveTo(destDirEntry, newName);
-//              } else {
-//                srcDirEntry.copyTo(destDirEntry, newName);
-//              }
-//          };
-//
-//          // Moving to a folder? (e.g. second arg ends in '/').
-//          if (dest[dest.length - 1] == '/') {
-//            cwd_.getDirectory(src, {}, function(srcDirEntry) {
-//              // Create blacklist for dirs we can't re-create.
-//              var create = [
-//                '.', './', '..', '../', '/'].indexOf(dest) != -1 ? false : true;
-//
-//              cwd_.getDirectory(dest, {create: create}, function(destDirEntry) {
-//                runAction(cmd, srcDirEntry, destDirEntry);
-//              }, errorHandler_);
-//            }, function(e) {
-//              // Try the src entry as a file instead.
-//              cwd_.getFile(src, {}, function(srcDirEntry) {
-//                cwd_.getDirectory(dest, {}, function(destDirEntry) {
-//                  runAction(cmd, srcDirEntry, destDirEntry);
-//                }, errorHandler_);
-//              }, errorHandler_);
-//            });
-//          } else { // Treat src/destination as files.
-//            cwd_.getFile(src, {}, function(srcFileEntry) {
-//              srcFileEntry.getParent(function(parentDirEntry) {
-//                runAction(cmd, srcFileEntry, parentDirEntry, dest);
-//              }, errorHandler_);
-//            }, errorHandler_);
-//          }
-
-//          break;
-//        case 'open':
-//          var fileName = args.join(' ');
-//
-//          if (!fileName) {
-//            output('usage: ' + cmd + ' filename');
-//            break;
-//          }
-//
-//          open_(cmd, fileName, function(fileEntry) {
-//            var myWin = window.open(fileEntry.toURL(), 'mywin');
-//          });
-//
-//          break;
-//        case 'rm':
-//          // Remove recursively? If so, remove the flag(s) from the arg list.
-//          var recursive = false;
-//          ['-r', '-f', '-rf', '-fr'].forEach(function(arg, i) {
-//            var index = args.indexOf(arg);
-//            if (index != -1) {
-//              args.splice(index, 1);
-//              recursive = true;
-//            }
-//          });
-//
-//          // Remove each file passed as an argument.
-//          args.forEach(function(fileName, i) {
-//            cwd_.getFile(fileName, {}, function(fileEntry) {
-//              fileEntry.remove(function() {
-//                // Tell FSN visualizer that we're rm'ing.
-//                if (fsn_) {
-//                  fsn_.contentWindow.postMessage({cmd: 'rm', data: fileName}, location.origin);
-//                }
-//              }, errorHandler_);
-//            }, function(e) {
-//              if (recursive && e.code == FileError.TYPE_MISMATCH_ERR) {
-//                cwd_.getDirectory(fileName, {}, function(dirEntry) {
-//                  dirEntry.removeRecursively(null, errorHandler_);
-//                }, errorHandler_);
-//              } else if (e.code == FileError.INVALID_STATE_ERR) {
-//                output(cmd + ': ' + fileName + ': is a directory<br>');
-//              } else {
-//                errorHandler_(e);
-//              }
-//            });
-//          });
-//          break;
-//        case 'rmdir':
-//          // Remove each directory passed as an argument.
-//          args.forEach(function(dirName, i) {
-//            cwd_.getDirectory(dirName, {}, function(dirEntry) {
-//              dirEntry.remove(function() {
-//                // Tell FSN visualizer that we're rmdir'ing.
-//                if (fsn_) {
-//                  fsn_.contentWindow.postMessage({cmd: 'rm', data: dirName}, location.origin);
-//                }
-//              }, function(e) {
-//                if (e.code == FileError.INVALID_MODIFICATION_ERR) {
-//                  output(cmd + ': ' + dirName + ': Directory not empty<br>');
-//                } else {
-//                  errorHandler_(e);
-//                }
-//              });
-//            }, function(e) { invalidOpForEntryType_(e, cmd, dirName); });
-//          });
-//          break;
-//        case 'sudo':
-//          if (timer_ != null) {
-//            magicWord_.stop();
-//            clearInterval(timer_);
-//          }
-//          if (!magicWord_) {
-//            magicWord_ = new Sound(true);
-//            magicWord_.load('magic_word.mp3', false, function() {
-//              magicWord_.play();
-//            });
-//          } else {
-//            magicWord_.play();
-//          }
-//          timer_ = setInterval(function() {
-//            output("<div>YOU DIDN'T SAY THE MAGIC WORD!</div>");
-//          }, 100);
-//          break;
+          cmd_info(args);
+          break;            
         case 'version':
         case 'ver':
           output(VERSION_);

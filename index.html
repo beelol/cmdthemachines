@@ -129,6 +129,8 @@ function toggleHelp() {
         
         var currentSystemPlanets = [];    
         
+        solarSystems[i] = new SolarSystem(generateName(), null); 
+        
         // Generate all planets
         for(j=0; j<numPlanets; j++) {     
             var chosenIndices = [];
@@ -147,12 +149,14 @@ function toggleHelp() {
                 chosenIndices.push(index);
             }
             
+            p.system = solarSystems[i];
+            
             currentSystemPlanets[j] = p;
             
             planets.push(currentSystemPlanets[j]);                    
         }
         
-        solarSystems[i] = new SolarSystem(generateName(), currentSystemPlanets);    
+        solarSystems[i].planets = currentSystemPlanets;
     }    
     
     // Make a list of pod vessels
