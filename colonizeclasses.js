@@ -1,3 +1,16 @@
+/*
+Copyright 2015 Bilal Itani 
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+This script is based on code originally written by Eric Bidelman, but is now heavily
+modified.
+*/
+
 // Colonizeable planet
 function Planet(name, forces) {
     this.name = name;

@@ -16,6 +16,19 @@ limitations under the License.
 Author: Eric Bidelman (ericbidelman@chromium.org)
 */
 
+/*
+Copyright 2015 Bilal Itani 
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+This script is based on code originally written by Eric Bidelman, but is now heavily
+modified.
+*/
+
 const newline = '<div class="one-liner">';
 
 var util = util || {};
@@ -91,7 +104,7 @@ var Terminal = Terminal || function(containerId) {
   window.requestFileSystem = window.requestFileSystem ||
                              window.webkitRequestFileSystem;
 
-  const VERSION_ = '0.5.1';
+  const VERSION_ = '0.0.1';
     
   const CMDS_ = [
     'help', 'about', 'units', 'info', 'systems', 'launch', 'orbit', 'jump'
