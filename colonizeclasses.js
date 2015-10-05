@@ -6,9 +6,6 @@ you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
 http://www.apache.org/licenses/LICENSE-2.0
-
-This script is based on code originally written by Eric Bidelman, but is now heavily
-modified.
 */
 
 // Colonizeable planet
@@ -37,7 +34,7 @@ SolarSystem.prototype.getName = function() {
 
 
 // Used to colonize a planet
-function Pod (forces, id, vessel){
+function Pod (forces, id, vessel) {
     this.forces = forces;
     this.id = id;
     this.vessel = vessel;
