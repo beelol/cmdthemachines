@@ -469,23 +469,23 @@ var Terminal = Terminal || function(containerId) {
                             var desiredSystem;
 
                             for(var i=0; i<solarSystems.length; i++) {
-                                if(solarSystems[i].getName().toLowerCase() == args[2]){
+                                if(solarSystems[i].getName().toLowerCase() == args[2].toString().toLowerCase()){
                                     desiredSystem = solarSystems[i];
                                     break;
                                 }
                             }
                             
+                            if(desiredSystem == null) {
+                                output(newline + vessel.getName() + ': hyperspace jump unsuccessful. ');
+                                output(newline + 'System with name \'' + args[2].toString(); + '\'' + ' is not available.');
+                                return;
+                            }                            
+                            
                             if(desiredSystem === vessel.system) {
                                 output(newline + vessel.getName() + ': hyperspace jump unsuccessful. ');
                                 output(newline + vessel.getName() + ' is already in that system.');
                                 return;
-                            }
-                            
-                            if(desiredSystem == null) {
-                                output(newline + vessel.getName() + ': hyperspace jump unsuccessful. ');
-                                output(newline + 'System with name \'' + name + '\'' + ' is not available.');
-                                return;
-                            }
+                            }                            
                             
                             output(newline + vessel.getName() + ': hyperspace jump initializing... ');
                             output(newline + vessel.getName() + ': hyperspace jump successful. ');
