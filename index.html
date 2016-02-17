@@ -59,8 +59,10 @@ function toggleHelp() {
   document.body.classList.toggle('dim');
 }
 
+var term;
+
 (function() {
-  var term = new Terminal('container');
+  term = new Terminal('container');
   term.initFS(false, 1024 * 1024);
 
   if (document.location.hash) {
@@ -95,8 +97,7 @@ function toggleHelp() {
     term.output('<div>File(s) added!</div>');
   }, false);
 })(); 
-</script>
-<script>
+
   var _gaq = _gaq || [];
   _gaq.push(['_setAccount', 'UA-23384572-1']);
   _gaq.push(['_trackPageview']);
@@ -106,9 +107,7 @@ function toggleHelp() {
     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
-</script>
 
-<script> 
     const BIOMES = [new Biome("Ocean"), new Biome("Desert"), new Biome("Swamp"), new Biome("Tundra"),
                 new Biome("Plains"), new Biome("Forest"), new Biome("Marshland")]
     
@@ -194,7 +193,7 @@ function toggleHelp() {
 
         arrayRemove(system, possibleSystems);
         
-        for(j=0; j<numPodPerVessel; j++){
+        for(j=0; j<numPodPerVessel; j++) {
             var podIndex = j + i * numPodPerVessel;
             
             var pod = new Pod(getRandomInt(100, 1000), podIndex + 1, vessels[i]);
@@ -213,8 +212,7 @@ function toggleHelp() {
             }
         }        
         return null;
-    }
-    
+    }           
 </script>
     
 </body>

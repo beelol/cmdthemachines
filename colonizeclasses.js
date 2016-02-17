@@ -11,6 +11,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 // Colonizeable planet
 function Planet(name, forces) {
     this.name = name;
+    this.units = 0;
     this.forces = forces;
     this.biomes = [];
     this.pods = [];
@@ -42,6 +43,7 @@ function Pod (forces, id, vessel) {
     this.planet = null;
     this.maxHealth = 100;
     this.health = this.maxHealth;
+    this.operational = true;
 }
 
 Pod.prototype.getName = function() {
@@ -49,15 +51,21 @@ Pod.prototype.getName = function() {
 }
 
 Pod.prototype.getLocation = function() {
-    if(this.docked = true){
+    if(this.docked == true){
         return 'Docked on ' + this.vessel.getName() + '.';
     }
-    else{
+    else if(this.operational == true) {
         return 'Deployed on planet ' + this.planet.getName() + '.';
+    }
+    else
+    {
+        return 'Unknown.';   
     }
 }
 
 Pod.prototype.getIntegrity = function() {
+    
+    if(!this.operational) return this.getName() + ' is no longer operational.';  
     var approx = roundToNearestTen(this.health)/10; /* To make it 0-10 */
     
     var integrityString = '[';
@@ -74,18 +82,62 @@ Pod.prototype.getIntegrity = function() {
     }
     
     integrityString += ']';
-    
-    return integrityString + ' ' + this.health/this.maxHealth * 100 + '%';
+        
+    return integrityString + ' ' + this.health/this.maxHealth * 100 + '%';           
 }
 
 Pod.prototype.launch = function(planet) {
-    this.planet = planet;
+    var chance = getRandomInt(0, 4)
     
-    planet.pods.push(this);
+    if(chance == 0)
+    {
+        this.destroy();
+        
+        return false
+    }
+    else
+    {    
+        this.planet = planet;
+        
+        planet.units += this.forces;        
+        
+        planet.pods.push(this);
+        
+        arrayRemove(this, this.vessel.pods);
+        
+        this.docked = false;
+        
+        return true;
+    }   
+    
+}
 
-    arrayRemove(this, this.vessel.pods);
+Pod.prototype.takeDamage = function(number) {
+    this.health -= number;
     
+    if(this.health <= 0) {
+        this.destroy();
+    }
+}
+
+Pod.prototype.destroy = function() {
+    
+    // Remove hp
+    this.health = 0
+    
+    // Remove it from the pod list
+    //arrayRemove(this, podList);
+    
+    // No more forces in here.
+    this.forces = 0;
+    
+    //this.id = id;
+    
+    // Remove from vessel in case it was in one
     this.docked = false;
+    
+    // you're dead
+    this.operational = false;
 }
 
 // Transports pods between systems

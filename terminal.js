@@ -30,6 +30,8 @@ This script is based on code originally written by Eric Bidelman, but is now mod
 
 const newline = '<div class="one-liner">';
 
+const loopDelay = 2;
+
 var util = util || {};
 util.toArray = function(list) {
   return Array.prototype.slice.call(list || [], 0);
@@ -121,6 +123,13 @@ var Terminal = Terminal || function(containerId) {
   var magicWord_ = null;
 
   var fsn_ = null;
+  
+  var loop = setInterval(gameLoop, loopDelay*1000);
+  
+  function gameLoop()
+  {
+    output(newline + "looping");
+  }
 
   // Fire worker to return recursive snapshot of current FS tree.
 //  var worker_ = new Worker('worker.js');
@@ -276,7 +285,16 @@ var Terminal = Terminal || function(containerId) {
             var pod = podList[id-1];
             var podVessel = pod.vessel;
             
-            if(pod.docked == false){
+            // if the pod is dead
+            if(!pod.operational) {
+              output(newline + pod.vessel.getName() + ' launch sequence initiated.');
+              output(newline + pod.getName() + ' launch unsuccessful.');
+              output(newline + pod.getIntegrity());
+              return;
+            }
+            
+            // if the pod was already launched
+            if(pod.docked == false) {
                 output(newline + pod.vessel.getName() + ' launch sequence initiated.');
                 output(newline + pod.getName() + ' launch unsuccessful.');
                 output(newline + pod.getName() + ' is already deployed on planet ' + pod.planet.getName() + '.');
@@ -284,20 +302,33 @@ var Terminal = Terminal || function(containerId) {
                 return;
             }
             
-            if(podVessel.targetPlanet == null){
+            // if not in orbit of a planet
+            if(podVessel.targetPlanet == null) {
                 output(newline + pod.vessel.getName() + ' launch sequence initiated.');
                 output(newline + pod.getName() +  ' launch unsuccessful.');
                 output(newline + pod.vessel.getName() + ' is not in orbit of any planet.' );
                 output(newline);
                 return;
             } else {
-                pod.launch(podVessel.targetPlanet);
+                // if we landed
+                if(pod.launch(podVessel.targetPlanet)) {
+                  output(newline + pod.vessel.getName() + ' launch sequence initiated.');
+                  output(newline +  pod.getName() + ' launch successful.');
+                  output(newline +  pod.getName() + ' landing successful.');
+                  output(newline + 'Pod standing by on planet ' + pod.planet.getName() + '.');
+                  output(newline);
+                // if landing was unsuccessful
+                } else {
+                  output(newline + pod.vessel.getName() + ' launch sequence initiated.');
+                  output(newline + pod.getName() +  ' launch successful.');
+                  output(newline + pod.getName() + ' landing unsuccessful.');
+                  output(newline + 'We have lost contact with ' + pod.getName() + '. Pod status unknown.');
+                  output(newline);
+                }
+                
             }
 
-            output(newline + pod.vessel.getName() + ' launch sequence initiated.');
-            output(newline + 'Pod ' + id + ' launch successful.');
-            output(newline + 'Pod standing by on planet ' + pod.planet.getName() + '.');
-            output(newline);
+            
 
         } else { // If the ID is out of bounds of array
             output(newline + 'Pod with id \'' + id + '\'' + ' is not available.');
@@ -890,5 +921,8 @@ var Terminal = Terminal || function(containerId) {
     },
     selectFile: selectFile_
   }
+    
+  
+  
 };
 
