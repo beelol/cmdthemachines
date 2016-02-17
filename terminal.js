@@ -477,7 +477,7 @@ var Terminal = Terminal || function(containerId) {
                             
                             if(desiredSystem == null) {
                                 output(newline + vessel.getName() + ': hyperspace jump unsuccessful. ');
-                                output(newline + 'System with name \'' + args[2].toString(); + '\'' + ' is not available.');
+                                output(newline + 'System with name \'' + args[2].toString() + '\'' + ' is not available.');
                                 return;
                             }                            
                             
