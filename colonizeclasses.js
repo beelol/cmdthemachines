@@ -129,6 +129,7 @@ Pod.prototype.destroy = function() {
     //arrayRemove(this, podList);
     
     // No more forces in here.
+    // Determine elsewhere before calling where the forces go
     this.forces = 0;
     
     //this.id = id;
@@ -148,6 +149,7 @@ function PodVessel(pods, system, id) {
     this.maxHealth = 100;
     this.health = this.maxHealth;
     this.targetPlanet = null;
+    this.operational = true;
 }
     
 PodVessel.prototype.moveToSystem = function(system) {
@@ -163,6 +165,8 @@ PodVessel.prototype.getStatus = function() {
 }
 
 PodVessel.prototype.getIntegrity = function() {
+    if(this.operational == false) return this.name + " is no longer operational.";
+
     var approx = roundToNearestTen(this.health)/10; /* To make it 0-10 */
     
     var integrityString = '[';
@@ -200,6 +204,34 @@ PodVessel.prototype.jump = function(system) {
     this.system = system;
     system.vessels.push(this);
     this.targetPlanet = null;
+}
+
+PodVessel.prototype.takeDamage = function(number) {
+    this.health -= number;
+    
+    if(this.health <= 0) {
+        this.destroy();
+    }
+}
+
+PodVessel.prototype.destroy = function() {
+    
+    // Remove hp
+    this.health = 0
+    
+    // Pods are destroyed when a vessel containing them is destroyed
+    for(var i = 0; i<this.pods.length; i++){
+        this.pods[i].destroy();
+    }
+
+    //this.id = id;
+    
+    // Remove from vessel in case it was in one
+    this.docked = false;
+    this.targetPlanet = null;
+    
+    // you're dead
+    this.operational = false;
 }
 
 function Biome(name) { 
