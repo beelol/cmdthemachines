@@ -128,7 +128,7 @@ var Terminal = Terminal || function(containerId) {
   
   function gameLoop()
   {
-    output(newline + "looping");
+    //output(newline + "looping");
   }
 
   // Fire worker to return recursive snapshot of current FS tree.
